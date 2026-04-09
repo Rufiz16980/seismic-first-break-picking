@@ -1,0 +1,30 @@
+@'
+.tmp.drivedownload/
+.tmp.driveupload/
+
+# Large data files - never commit these
+*.hdf5
+*.hdf5.xz
+*.hdf
+*.hdf.xz
+*.npz
+*.npy
+*.pt
+*.pth
+
+# Model artifacts and tracking
+mlruns/
+models/checkpoints/
+models/final/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+'@ | Set-Content -Encoding UTF8 .gitignore
