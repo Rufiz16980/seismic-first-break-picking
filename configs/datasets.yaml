@@ -1,0 +1,20 @@
+project_root: "/content/drive/MyDrive/seismic-first-break-picking"
+
+paths:
+  raw: "data/raw"
+  extracted: "data/extracted"
+  processed: "data/processed"
+  datasets: "data/datasets"
+  models: "models/checkpoints"
+  results: "results"
+  mlruns: "mlruns"
+
+mlflow:
+  tracking_uri: "file:///content/drive/MyDrive/seismic-first-break-picking/mlruns"
+
+assets:
+  names: ["brunswick", "halfmile", "lalor", "sudbury"]
+
+visualization:
+  examples_json: "results/visualization_examples.json"
+  n_examples_per_asset: 3

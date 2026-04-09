@@ -1,0 +1,2 @@
+model_name: "cnn_1d"
+framing: "trace_regression"

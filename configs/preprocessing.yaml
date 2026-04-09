@@ -1,0 +1,7 @@
+normalization:
+  enabled: false
+  method: null
+windowing:
+  enabled: false
+augmentation:
+  enabled: false
