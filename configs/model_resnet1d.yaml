@@ -1,0 +1,34 @@
+experiment:
+  name: resnet1d_deep
+  seed: 42
+  asset: all
+  framing: trace
+data:
+  index_csv: data/processed/split_index.csv
+  processed_dir: data/processed/
+  target_n_samples: 1500
+  target_n_traces: 120
+  normalization: per_trace
+  cache_in_ram: false
+model:
+  architecture: resnet1d
+  base_channels: 32
+training:
+  training_mode: combined
+  batch_size: 2
+  gradient_accumulation_steps: 4
+  epochs: 30
+  optimizer: adamw
+  lr: 0.001
+  weight_decay: 0.0001
+  early_stopping_patience: 15
+  gradient_clip_norm: 1.0
+  scheduler_params:
+    T_max: 30
+    eta_min: 0.000001
+loss:
+  primary: masked_mae
+  huber_delta: 5.0
+output:
+  tracking_uri: mlruns
+  checkpoint_dir: models/resnet1d

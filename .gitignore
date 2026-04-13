@@ -1,8 +1,8 @@
-@'
 .tmp.drivedownload/
 .tmp.driveupload/
 
-# Large data files - never commit these
+# Large data files
+data/
 *.hdf5
 *.hdf5.xz
 *.hdf
@@ -12,10 +12,17 @@
 *.pt
 *.pth
 
-# Model artifacts and tracking
+# Model artifacts, tracking, and AI plots
 mlruns/
-models/checkpoints/
-models/final/
+models/
+artifacts/
+
+# Debugging and Scratch
+scratch/
+CURRENT_STATUS.md
+
+# Documentation
+documentation/
 
 # Python
 venv/
@@ -27,4 +34,4 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
-'@ | Set-Content -Encoding UTF8 .gitignore
+desktop.ini

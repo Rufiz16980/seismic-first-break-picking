@@ -1,0 +1,42 @@
+experiment:
+  name: bilstm_sequential
+  seed: 42
+  asset: all
+  framing: trace
+data:
+  index_csv: data/processed/split_index.csv
+  processed_dir: data/processed/
+  target_n_samples: 1500
+  target_n_traces: 120
+  normalization: per_trace
+  cache_in_ram: false
+model:
+  architecture: bilstm
+  hidden_size: 64
+  num_layers: 2
+training:
+  training_mode: combined
+  batch_size: 2
+  gradient_accumulation_steps: 4
+  epochs: 30
+  optimizer: adamw
+  lr: 0.0005
+  weight_decay: 0.0001
+  early_stopping_patience: 15
+  gradient_clip_norm: 1.0
+  scheduler_params:
+    T_max: 30
+    eta_min: 0.000001
+loss:
+  primary: masked_mae
+  huber_delta: 5.0
+output:
+  tracking_uri: mlruns
+  checkpoint_dir: models/bilstm
+progressive_training:
+  asset_order: [brunswick, halfmile, lalor, sudbury]
+  asset_epochs: [30, 15, 15, 15]
+  asset_lr: [0.0005, 0.0001, 0.0001, 0.0001]
+  replay_fraction: 0.15
+  reset_optimizer: true
+  reset_scheduler: true

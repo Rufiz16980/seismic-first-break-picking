@@ -1,0 +1,131 @@
+{
+  "phase": "Phase 1 EDA",
+  "status": "COMPLETE",
+  "assets_analyzed": [
+    "brunswick",
+    "halfmile",
+    "lalor",
+    "sudbury"
+  ],
+  "per_asset": {
+    "brunswick": {
+      "total_traces": 4496540,
+      "labeled_traces": 3733221,
+      "labeled_fraction": 0.8302,
+      "samp_rate_us": 2000,
+      "samp_num": 751,
+      "time_window_ms": 1500,
+      "n_shots": 1541,
+      "median_gather_size": 2975.0,
+      "fb_time_median_ms": 384.0,
+      "fb_time_std_ms": 229.56444516376504,
+      "dead_fraction": 0.0,
+      "clipped_fraction": 0.0,
+      "mispick_fraction": 0.003942002156944576
+    },
+    "halfmile": {
+      "total_traces": 1099559,
+      "labeled_traces": 993189,
+      "labeled_fraction": 0.9033,
+      "samp_rate_us": 2000,
+      "samp_num": 751,
+      "time_window_ms": 1500,
+      "n_shots": 690,
+      "median_gather_size": 1604.0,
+      "fb_time_median_ms": 344.0,
+      "fb_time_std_ms": 154.91804985078338,
+      "dead_fraction": 0.01358,
+      "clipped_fraction": 0.0,
+      "mispick_fraction": 0.00470359369843503
+    },
+    "lalor": {
+      "total_traces": 2424923,
+      "labeled_traces": 1211857,
+      "labeled_fraction": 0.4998,
+      "samp_rate_us": 1000,
+      "samp_num": 1501,
+      "time_window_ms": 1500,
+      "n_shots": 907,
+      "median_gather_size": 2685.0,
+      "fb_time_median_ms": 248.0,
+      "fb_time_std_ms": 109.29450079647651,
+      "dead_fraction": 0.00012,
+      "clipped_fraction": 0.0,
+      "mispick_fraction": 0.013834633552136674
+    },
+    "sudbury": {
+      "total_traces": 1810220,
+      "labeled_traces": 200338,
+      "labeled_fraction": 0.1107,
+      "samp_rate_us": 2000,
+      "samp_num": 1001,
+      "time_window_ms": 2000,
+      "n_shots": 1016,
+      "median_gather_size": 1763.0,
+      "fb_time_median_ms": 162.0,
+      "fb_time_std_ms": 71.33397158098745,
+      "dead_fraction": 0.0,
+      "clipped_fraction": 0.0,
+      "mispick_fraction": 0.011237178905328129
+    }
+  },
+  "critical_issues": [
+    {
+      "issue": "heterogeneous_sample_rates",
+      "description": "Lalor uses 1000\u00b5s, others use 2000\u00b5s. Resampling required.",
+      "affected_assets": [
+        "lalor"
+      ]
+    },
+    {
+      "issue": "heterogeneous_trace_lengths",
+      "description": "751 (brunswick/halfmile), 1001 (sudbury), 1501 (lalor). Must unify.",
+      "affected_assets": [
+        "brunswick",
+        "halfmile",
+        "lalor",
+        "sudbury"
+      ]
+    },
+    {
+      "issue": "extreme_label_imbalance",
+      "description": "Sudbury has only 11% labeled traces vs 90% for Halfmile.",
+      "affected_assets": [
+        "sudbury",
+        "lalor"
+      ]
+    },
+    {
+      "issue": "different_coordinate_scales",
+      "description": "COORD_SCALE varies: -10, 1, 100. Must normalize offsets.",
+      "affected_assets": [
+        "brunswick",
+        "halfmile",
+        "lalor",
+        "sudbury"
+      ]
+    }
+  ],
+  "preprocessing_recommendations": [
+    "Resample Lalor traces from 1ms to 2ms sampling to match other assets",
+    "Crop/pad all traces to a common time window (1500ms recommended)",
+    "Normalize coordinates per-asset before computing offsets for shot gather ordering",
+    "Use shot-gather (2D) framing for primary model \u2014 trace-level framing as baseline",
+    "Implement balanced sampling across assets weighted by label count",
+    "Exclude unlabeled traces (SPARE1 <= 0) from training, keep for potential semi-supervised use",
+    "Apply per-gather amplitude normalization (not global) to handle scale differences",
+    "Use leave-one-site-out cross-validation (hardpicks benchmark protocol)"
+  ],
+  "model_framing_decision": {
+    "primary": "shot_gather_2d_segmentation",
+    "baseline": "trace_level_regression",
+    "reasoning": "2D shot gathers exploit spatial coherence of first-break curve. This matches the hardpicks benchmark baseline (U-Net segmentation)."
+  },
+  "benchmark_reference": {
+    "name": "hardpicks (mila-iqia)",
+    "repo": "https://github.com/mila-iqia/hardpicks",
+    "paper": "St-Charles et al., GEOPHYSICS 2023",
+    "baseline_model": "U-Net semantic segmentation",
+    "cross_validation": "leave-one-site-out (4 folds)"
+  }
+}

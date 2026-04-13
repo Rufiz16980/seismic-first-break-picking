@@ -1,0 +1,594 @@
+{
+  "section_1_fbt_vs_spare1": {
+    "brunswick": {
+      "asset": "brunswick",
+      "fbt_present": true,
+      "fbt_shape": [
+        4496540,
+        1
+      ],
+      "fbt_dtype": "float32",
+      "spare1_shape": [
+        4496540,
+        1
+      ],
+      "spare1_dtype": "int32",
+      "fbt_count_zero": 4496540,
+      "fbt_count_negative": 0,
+      "fbt_count_positive": 0,
+      "fbt_total": 4496540,
+      "spare1_count_zero": 0,
+      "spare1_count_negative": 763319,
+      "spare1_count_positive": 3733221,
+      "spare1_total": 4496540,
+      "n_both_positive": 0,
+      "fbt_at_labeled_traces": {
+        "all_zero": true,
+        "pct_zero": 100.0,
+        "pct_positive": 0.0,
+        "pct_negative": 0.0,
+        "unique_values_sample": [
+          0.0
+        ]
+      },
+      "fbt_nonzero_stats": "ALL ZERO"
+    },
+    "halfmile": {
+      "asset": "halfmile",
+      "fbt_present": true,
+      "fbt_shape": [
+        1099559,
+        1
+      ],
+      "fbt_dtype": "float32",
+      "spare1_shape": [
+        1099559,
+        1
+      ],
+      "spare1_dtype": "int32",
+      "fbt_count_zero": 1099559,
+      "fbt_count_negative": 0,
+      "fbt_count_positive": 0,
+      "fbt_total": 1099559,
+      "spare1_count_zero": 0,
+      "spare1_count_negative": 106370,
+      "spare1_count_positive": 993189,
+      "spare1_total": 1099559,
+      "n_both_positive": 0,
+      "fbt_at_labeled_traces": {
+        "all_zero": true,
+        "pct_zero": 100.0,
+        "pct_positive": 0.0,
+        "pct_negative": 0.0,
+        "unique_values_sample": [
+          0.0
+        ]
+      },
+      "fbt_nonzero_stats": "ALL ZERO"
+    },
+    "lalor": {
+      "asset": "lalor",
+      "fbt_present": true,
+      "fbt_shape": [
+        2424923,
+        1
+      ],
+      "fbt_dtype": "float32",
+      "spare1_shape": [
+        2424923,
+        1
+      ],
+      "spare1_dtype": "int32",
+      "fbt_count_zero": 2424923,
+      "fbt_count_negative": 0,
+      "fbt_count_positive": 0,
+      "fbt_total": 2424923,
+      "spare1_count_zero": 0,
+      "spare1_count_negative": 1213066,
+      "spare1_count_positive": 1211857,
+      "spare1_total": 2424923,
+      "n_both_positive": 0,
+      "fbt_at_labeled_traces": {
+        "all_zero": true,
+        "pct_zero": 100.0,
+        "pct_positive": 0.0,
+        "pct_negative": 0.0,
+        "unique_values_sample": [
+          0.0
+        ]
+      },
+      "fbt_nonzero_stats": "ALL ZERO"
+    },
+    "sudbury": {
+      "asset": "sudbury",
+      "fbt_present": true,
+      "fbt_shape": [
+        1810220,
+        1
+      ],
+      "fbt_dtype": "float32",
+      "spare1_shape": [
+        1810220,
+        1
+      ],
+      "spare1_dtype": "int32",
+      "fbt_count_zero": 1810220,
+      "fbt_count_negative": 0,
+      "fbt_count_positive": 0,
+      "fbt_total": 1810220,
+      "spare1_count_zero": 1609882,
+      "spare1_count_negative": 0,
+      "spare1_count_positive": 200338,
+      "spare1_total": 1810220,
+      "n_both_positive": 0,
+      "fbt_at_labeled_traces": {
+        "all_zero": true,
+        "pct_zero": 100.0,
+        "pct_positive": 0.0,
+        "pct_negative": 0.0,
+        "unique_values_sample": [
+          0.0
+        ]
+      },
+      "fbt_nonzero_stats": "ALL ZERO"
+    }
+  },
+  "section_2_modelled_break_time": {
+    "brunswick": {
+      "asset": "brunswick",
+      "mbt_present": true,
+      "mbt_dtype": "float32",
+      "mbt_shape": [
+        4496540,
+        1
+      ],
+      "mbt_count_zero": 4496540,
+      "mbt_count_positive": 0,
+      "mbt_count_negative": 0,
+      "mbt_total": 4496540,
+      "n_both_positive": 0,
+      "mbt_nonzero_stats": "ALL ZERO"
+    },
+    "halfmile": {
+      "asset": "halfmile",
+      "mbt_present": true,
+      "mbt_dtype": "float32",
+      "mbt_shape": [
+        1099559,
+        1
+      ],
+      "mbt_count_zero": 1099559,
+      "mbt_count_positive": 0,
+      "mbt_count_negative": 0,
+      "mbt_total": 1099559,
+      "n_both_positive": 0,
+      "mbt_nonzero_stats": "ALL ZERO"
+    },
+    "lalor": {
+      "asset": "lalor",
+      "mbt_present": true,
+      "mbt_dtype": "float32",
+      "mbt_shape": [
+        2424923,
+        1
+      ],
+      "mbt_count_zero": 2424923,
+      "mbt_count_positive": 0,
+      "mbt_count_negative": 0,
+      "mbt_total": 2424923,
+      "n_both_positive": 0,
+      "mbt_nonzero_stats": "ALL ZERO"
+    },
+    "sudbury": {
+      "asset": "sudbury",
+      "mbt_present": true,
+      "mbt_dtype": "float32",
+      "mbt_shape": [
+        1810220,
+        1
+      ],
+      "mbt_count_zero": 1810220,
+      "mbt_count_positive": 0,
+      "mbt_count_negative": 0,
+      "mbt_total": 1810220,
+      "n_both_positive": 0,
+      "mbt_nonzero_stats": "ALL ZERO"
+    }
+  },
+  "section_3_amplit_velocity": {
+    "brunswick": {
+      "asset": "brunswick",
+      "FIRST_BREAK_AMPLIT": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          4496540,
+          1
+        ],
+        "total": 4496540,
+        "count_zero": 4496540,
+        "count_nonzero": 0,
+        "count_positive": 0,
+        "count_negative": 0,
+        "nonzero_stats": "ALL ZERO"
+      },
+      "FIRST_BREAK_VELOCITY": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          4496540,
+          1
+        ],
+        "total": 4496540,
+        "count_zero": 4496540,
+        "count_nonzero": 0,
+        "count_positive": 0,
+        "count_negative": 0,
+        "nonzero_stats": "ALL ZERO"
+      }
+    },
+    "halfmile": {
+      "asset": "halfmile",
+      "FIRST_BREAK_AMPLIT": {
+        "present": false
+      },
+      "FIRST_BREAK_VELOCITY": {
+        "present": false
+      }
+    },
+    "lalor": {
+      "asset": "lalor",
+      "FIRST_BREAK_AMPLIT": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          2424923,
+          1
+        ],
+        "total": 2424923,
+        "count_zero": 2424923,
+        "count_nonzero": 0,
+        "count_positive": 0,
+        "count_negative": 0,
+        "nonzero_stats": "ALL ZERO"
+      },
+      "FIRST_BREAK_VELOCITY": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          2424923,
+          1
+        ],
+        "total": 2424923,
+        "count_zero": 2424923,
+        "count_nonzero": 0,
+        "count_positive": 0,
+        "count_negative": 0,
+        "nonzero_stats": "ALL ZERO"
+      }
+    },
+    "sudbury": {
+      "asset": "sudbury",
+      "FIRST_BREAK_AMPLIT": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          1810220,
+          1
+        ],
+        "total": 1810220,
+        "count_zero": 1810220,
+        "count_nonzero": 0,
+        "count_positive": 0,
+        "count_negative": 0,
+        "nonzero_stats": "ALL ZERO"
+      },
+      "FIRST_BREAK_VELOCITY": {
+        "present": true,
+        "dtype": "float32",
+        "shape": [
+          1810220,
+          1
+        ],
+        "total": 1810220,
+        "count_zero": 1810220,
+        "count_nonzero": 0,
+        "count_positive": 0,
+        "count_negative": 0,
+        "nonzero_stats": "ALL ZERO"
+      }
+    }
+  },
+  "section_4_spatial_sanity": {
+    "brunswick": {
+      "asset": "brunswick",
+      "coord_scale": -10,
+      "raw_src_x_range": [
+        2820280.0,
+        2876920.0
+      ],
+      "raw_src_y_range": [
+        52524640.0,
+        52594910.0
+      ],
+      "scaled_src_x_range": [
+        282028.0,
+        287692.0
+      ],
+      "scaled_src_y_range": [
+        5252464.0,
+        5259491.0
+      ],
+      "scaling_operation": "divide by abs"
+    },
+    "halfmile": {
+      "asset": "halfmile",
+      "coord_scale": 1,
+      "raw_src_x_range": [
+        698487.0,
+        704570.0
+      ],
+      "raw_src_y_range": [
+        5241860.0,
+        5247875.0
+      ],
+      "scaled_src_x_range": [
+        698487.0,
+        704570.0
+      ],
+      "scaled_src_y_range": [
+        5241860.0,
+        5247875.0
+      ],
+      "scaling_operation": "multiply"
+    },
+    "lalor": {
+      "asset": "lalor",
+      "coord_scale": -10,
+      "raw_src_x_range": [
+        7243.0,
+        55589.0
+      ],
+      "raw_src_y_range": [
+        87621.0,
+        144726.0
+      ],
+      "scaled_src_x_range": [
+        724.3,
+        5558.9
+      ],
+      "scaled_src_y_range": [
+        8762.1,
+        14472.6
+      ],
+      "scaling_operation": "divide by abs"
+    },
+    "sudbury": {
+      "asset": "sudbury",
+      "coord_scale": 100,
+      "raw_src_x_range": [
+        45774750.0,
+        46478281.0
+      ],
+      "raw_src_y_range": [
+        514794250.0,
+        515485500.0
+      ],
+      "scaled_src_x_range": [
+        4577475000.0,
+        4647828100.0
+      ],
+      "scaled_src_y_range": [
+        51479425000.0,
+        51548550000.0
+      ],
+      "scaling_operation": "multiply"
+    }
+  },
+  "section_5_resampling": {
+    "n_traces_tested": 20,
+    "source_rate_us": 1000,
+    "target_rate_us": 2000,
+    "source_samples": 1501,
+    "target_samples": 751,
+    "note": "Visual comparison shows both methods produce nearly identical results around first break. resample_poly is recommended as it avoids Fourier-domain boundary artifacts.",
+    "recommendation": "resample_poly"
+  },
+  "section_6_snr_redefinition": {
+    "brunswick": {
+      "n_shots_with_valid_snr": 1541,
+      "snr_median": 9.294784591810345,
+      "snr_mean": 8.976147508454543,
+      "snr_std": 2.805596556621643,
+      "snr_p5": 3.6931381819476417,
+      "snr_p25": 7.245038654391049,
+      "snr_p75": 10.908524031068342,
+      "snr_p95": 13.18342988709841
+    },
+    "halfmile": {
+      "n_shots_with_valid_snr": 690,
+      "snr_median": 6.078878180710413,
+      "snr_mean": 6.659758352271008,
+      "snr_std": 2.3059885067212655,
+      "snr_p5": 4.163183393706015,
+      "snr_p25": 5.265162112701143,
+      "snr_p75": 7.272026667345067,
+      "snr_p95": 11.552590350498406
+    },
+    "lalor": {
+      "n_shots_with_valid_snr": 905,
+      "snr_median": 21.576766306507306,
+      "snr_mean": 24.470003045929797,
+      "snr_std": 13.087904611992572,
+      "snr_p5": 9.882492668234068,
+      "snr_p25": 14.744560390215804,
+      "snr_p75": 30.892054181159747,
+      "snr_p95": 49.00610841808204
+    },
+    "sudbury": {
+      "n_shots_with_valid_snr": 715,
+      "snr_median": 10.573342859225672,
+      "snr_mean": 10.868048725543552,
+      "snr_std": 4.909740668344365,
+      "snr_p5": 3.5019949568351008,
+      "snr_p25": 7.679270321677637,
+      "snr_p75": 13.244312057230319,
+      "snr_p95": 18.938349600482002
+    }
+  },
+  "section_6_new_viz_examples": [
+    {
+      "asset": "brunswick",
+      "difficulty": "easy",
+      "shot_array_index": 945,
+      "shot_id": 1116,
+      "gather_size": 3299,
+      "label_fraction": 0.9184601394361928,
+      "snr_median": 13.04964266996738
+    },
+    {
+      "asset": "brunswick",
+      "difficulty": "medium",
+      "shot_array_index": 957,
+      "shot_id": 1129,
+      "gather_size": 3299,
+      "label_fraction": 0.8763261594422552,
+      "snr_median": 8.896294979810946
+    },
+    {
+      "asset": "brunswick",
+      "difficulty": "hard",
+      "shot_array_index": 277,
+      "shot_id": 326,
+      "gather_size": 2795,
+      "label_fraction": 0.6991055456171735,
+      "snr_median": 5.85116922969359
+    },
+    {
+      "asset": "halfmile",
+      "difficulty": "easy",
+      "shot_array_index": 25,
+      "shot_id": 20021519,
+      "gather_size": 1578,
+      "label_fraction": 0.9740177439797212,
+      "snr_median": 10.030363537023506
+    },
+    {
+      "asset": "halfmile",
+      "difficulty": "medium",
+      "shot_array_index": 42,
+      "shot_id": 20021573,
+      "gather_size": 1578,
+      "label_fraction": 0.9569074778200254,
+      "snr_median": 5.693193993179014
+    },
+    {
+      "asset": "halfmile",
+      "difficulty": "hard",
+      "shot_array_index": 479,
+      "shot_id": 20241019,
+      "gather_size": 1604,
+      "label_fraction": 0.8447630922693267,
+      "snr_median": 4.874947478648604
+    },
+    {
+      "asset": "lalor",
+      "difficulty": "easy",
+      "shot_array_index": 313,
+      "shot_id": 346,
+      "gather_size": 2685,
+      "label_fraction": 0.36834264432029795,
+      "snr_median": 36.62978919283424
+    },
+    {
+      "asset": "lalor",
+      "difficulty": "medium",
+      "shot_array_index": 347,
+      "shot_id": 381,
+      "gather_size": 2685,
+      "label_fraction": 0.25996275605214153,
+      "snr_median": 18.890481655561047
+    },
+    {
+      "asset": "lalor",
+      "difficulty": "hard",
+      "shot_array_index": 443,
+      "shot_id": 477,
+      "gather_size": 2685,
+      "label_fraction": 0.3422718808193669,
+      "snr_median": 11.681442101975257
+    },
+    {
+      "asset": "sudbury",
+      "difficulty": "easy",
+      "shot_array_index": 543,
+      "shot_id": 610,
+      "gather_size": 1983,
+      "label_fraction": 0.15128593040847202,
+      "snr_median": 14.410096897902005
+    },
+    {
+      "asset": "sudbury",
+      "difficulty": "medium",
+      "shot_array_index": 633,
+      "shot_id": 703,
+      "gather_size": 1763,
+      "label_fraction": 0.16959727736812252,
+      "snr_median": 11.364014074944343
+    },
+    {
+      "asset": "sudbury",
+      "difficulty": "hard",
+      "shot_array_index": 78,
+      "shot_id": 83,
+      "gather_size": 1328,
+      "label_fraction": 0.11295180722891567,
+      "snr_median": 5.93608834481954
+    }
+  ],
+  "section_7_memory_estimate": {
+    "n_samples_per_trace": 751,
+    "dtype": "float32",
+    "bytes_per_element": 4,
+    "gathers": [
+      {
+        "label": "small",
+        "shot_index": 381,
+        "gather_size": 2135,
+        "tensor_shape": [
+          751,
+          2135
+        ],
+        "mb_single": 6.12,
+        "mb_batch_8": 48.93
+      },
+      {
+        "label": "median",
+        "shot_index": 1203,
+        "gather_size": 2975,
+        "tensor_shape": [
+          751,
+          2975
+        ],
+        "mb_single": 8.52,
+        "mb_batch_8": 68.18
+      },
+      {
+        "label": "large",
+        "shot_index": 823,
+        "gather_size": 3355,
+        "tensor_shape": [
+          751,
+          3355
+        ],
+        "mb_single": 9.61,
+        "mb_batch_8": 76.89
+      }
+    ],
+    "max_width_recommendation": 4096,
+    "unet_depth": 4,
+    "divisibility_requirement": 16,
+    "mb_at_max_width_single": 11.73,
+    "mb_at_max_width_batch8": 93.88
+  }
+}

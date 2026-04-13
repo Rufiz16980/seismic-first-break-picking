@@ -1,5 +1,3 @@
-project_root: "/content/drive/MyDrive/seismic-first-break-picking"
-
 paths:
   raw: "data/raw"
   extracted: "data/extracted"
@@ -7,13 +5,108 @@ paths:
   datasets: "data/datasets"
   models: "models/checkpoints"
   results: "results"
+  eda_plots: "results/eda_plots"
+  eda_json: "results/eda"
   mlruns: "mlruns"
-
-mlflow:
-  tracking_uri: "file:///content/drive/MyDrive/seismic-first-break-picking/mlruns"
 
 assets:
   names: ["brunswick", "halfmile", "lalor", "sudbury"]
+
+# ----- Per-asset metadata (verified from Phase 0.5) -----
+asset_meta:
+  brunswick:
+    raw_file: "brunswick.hdf5.xz"
+    extracted_file: "brunswick.hdf5"
+    total_traces: 4496540
+    samp_num: 751
+    samp_rate_us: 2000
+    coord_scale: -10
+    ht_scale: -10
+    labeled_traces: 3733221
+    labeled_fraction: 0.8302
+    time_window_ms: 1500
+
+  halfmile:
+    raw_file: "halfmile.hdf5.xz"
+    extracted_file: "halfmile.hdf5"
+    total_traces: 1099559
+    samp_num: 751
+    samp_rate_us: 2000
+    coord_scale: 1
+    ht_scale: -10000
+    labeled_traces: 993189
+    labeled_fraction: 0.9033
+    time_window_ms: 1500
+
+  lalor:
+    raw_file: "lalor.hdf5.xz"
+    extracted_file: "lalor.hdf5"
+    total_traces: 2424923
+    samp_num: 1501
+    samp_rate_us: 1000
+    coord_scale: -10
+    ht_scale: -10
+    labeled_traces: 1211857
+    labeled_fraction: 0.4998
+    time_window_ms: 1500
+
+  sudbury:
+    raw_file: "sudbury.hdf.xz"
+    extracted_file: "sudbury.hdf5"
+    total_traces: 1810220
+    samp_num: 1001
+    samp_rate_us: 2000
+    coord_scale: 100
+    ht_scale: 10
+    labeled_traces: 200338
+    labeled_fraction: 0.1107
+    time_window_ms: 2000
+
+# Task-relevant HDF5 keys (from task description PDF)
+required_keys:
+  - "data_array"
+  - "SHOTID"
+  - "SHOT_PEG"
+  - "SOURCE_X"
+  - "SOURCE_Y"
+  - "SOURCE_HT"
+  - "REC_PEG"
+  - "REC_X"
+  - "REC_Y"
+  - "REC_HT"
+  - "SAMP_RATE"
+  - "COORD_SCALE"
+  - "HT_SCALE"
+  - "SAMP_NUM"
+  - "SPARE1"
+
+# Extra keys of potential interest for EDA/validation
+extra_useful_keys:
+  - "FIRST_BREAK_TIME"
+  - "FIRST_BREAK_AMPLIT"
+  - "FIRST_BREAK_VELOCITY"
+  - "MODELLED_BREAK_TIME"
+  - "OFFSET"
+  - "OFFSET_FLT"
+
+# Hardpicks benchmark cross-validation folds (from mila-iqia/hardpicks)
+benchmark_folds:
+  fold_sudbury:
+    train: ["halfmile", "lalor"]
+    valid: ["brunswick"]
+    test: ["sudbury"]
+  fold_brunswick:
+    train: ["sudbury", "halfmile"]
+    valid: ["lalor"]
+    test: ["brunswick"]
+  fold_halfmile:
+    train: ["lalor", "brunswick"]
+    valid: ["sudbury"]
+    test: ["halfmile"]
+  fold_lalor:
+    train: ["brunswick", "sudbury"]
+    valid: ["halfmile"]
+    test: ["lalor"]
 
 visualization:
   examples_json: "results/visualization_examples.json"

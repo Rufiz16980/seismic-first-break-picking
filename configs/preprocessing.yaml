@@ -1,7 +1,89 @@
+# ====================================================================
+# Preprocessing Pipeline Configuration — Phase 2
+# ====================================================================
+# All values are locked from the Phase 1 EDA Consolidated Decision Register
+# (see documentation/implementation_phases/Impl_Phase_1_Supplementary.md)
+#
+# Any change to these values MUST be documented with justification.
+# ====================================================================
+
+# --- Harmonization targets ----------------------------------------
+harmonization:
+  target_samp_rate_us: 2000          # 2ms sampling — common to 3/4 assets
+  target_samp_num: 751               # 1500ms / 2ms = 750 intervals + 1
+  target_time_window_ms: 1500        # Sudbury cropped from 2000ms
+
+# --- Resampling (Lalor only) --------------------------------------
+resampling:
+  method: "resample_poly"            # locked — empirically validated (supplementary §5)
+  up: 1
+  down: 2
+
+# --- Label processing ---------------------------------------------
+labels:
+  ground_truth_key: "SPARE1"         # only non-zero field; FBT/MBT confirmed dead
+  labeled_criterion: "positive"      # SPARE1 > 0 across all assets
+  store_ms: true                     # keep labels in milliseconds
+  store_sample_idx: true             # also convert to sample index
+  min_valid_ms: 1.0                  # labels below this flagged as suspicious
+  max_valid_percentile: 99.5         # labels above per-asset P99.5 flagged
+  mispick_sigma_threshold: 3.0      # 3σ polynomial outlier threshold
+
+# --- Normalization ------------------------------------------------
 normalization:
-  enabled: false
-  method: null
-windowing:
-  enabled: false
+  method: "per_trace"                # per_trace | per_gather (locked: per_trace)
+  epsilon: 1.0e-10                   # floor to avoid div-by-zero on dead traces
+
+# --- Shot gather construction -------------------------------------
+gather:
+  grouping_key: "SHOTID"             # primary grouping (verified identical to SHOT_PEG)
+  sort_by: "offset"                  # ascending source-receiver offset
+  min_traces: 10                     # drop shots with fewer traces
+  max_width_cap: 4096                # hard ceiling (fits T4 GPU)
+  width_divisibility: 16             # 2^4 for U-Net encoder depth 4
+  padding_value: 0.0                 # zero-pad for short gathers
+  batching_strategy: "variable"      # variable = per-batch pad to max; fixed = pad to cap
+
+# --- Coordinate processing ----------------------------------------
+coordinates:
+  use_precomputed_offset: true       # prefer OFFSET/OFFSET_FLT if non-zero
+  fallback_to_euclidean: true        # compute from scaled coords if OFFSET unavailable
+  # Note: absolute coordinates are NOT used as model features
+  # Only relative offsets within gathers matter
+
+# --- Train/Val/Test split -----------------------------------------
+splitting:
+  strategy: "per_asset"              # split each asset independently, then combine
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  stratify_by: "median_fbt_ms"       # stratify by median first break time per shot
+  n_quantile_bins: 5                 # number of quantile bins for stratification
+  random_seed: 42                    # reproducibility anchor
+
+# --- Data augmentation (applied at training time, not preprocessing)
 augmentation:
-  enabled: false
+  enabled: true
+  amplitude_scale:
+    enabled: true
+    range: [0.5, 2.0]               # uniform random multiplier
+  gaussian_noise:
+    enabled: true
+    snr_range: [0.05, 0.15]         # noise as fraction of signal RMS
+  trace_dropout:
+    enabled: true
+    rate: 0.05                       # fraction of traces zeroed per gather
+  time_shift:
+    enabled: true
+    max_samples: 10                  # ±10 samples uniform shift
+  polarity_reversal:
+    enabled: true
+    probability: 0.5                 # flip with 50% chance
+
+# --- Output paths (relative to project_root) ----------------------
+output:
+  processed_dir: "data/processed"    # per-asset subdirectories
+  datasets_dir: "data/datasets"      # train/val/test
+  master_index: "data/processed/master_index.csv"
+  split_index: "data/processed/split_index.csv"
+  preprocessing_report: "results/preprocessing_report.json"

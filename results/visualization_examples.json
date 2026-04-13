@@ -1,0 +1,110 @@
+[
+  {
+    "asset": "brunswick",
+    "difficulty": "easy",
+    "shot_array_index": 945,
+    "shot_id": 1116,
+    "gather_size": 3299,
+    "label_fraction": 0.9184601394361928,
+    "snr_median": 13.04964266996738
+  },
+  {
+    "asset": "brunswick",
+    "difficulty": "medium",
+    "shot_array_index": 957,
+    "shot_id": 1129,
+    "gather_size": 3299,
+    "label_fraction": 0.8763261594422552,
+    "snr_median": 8.896294979810946
+  },
+  {
+    "asset": "brunswick",
+    "difficulty": "hard",
+    "shot_array_index": 277,
+    "shot_id": 326,
+    "gather_size": 2795,
+    "label_fraction": 0.6991055456171735,
+    "snr_median": 5.85116922969359
+  },
+  {
+    "asset": "halfmile",
+    "difficulty": "easy",
+    "shot_array_index": 25,
+    "shot_id": 20021519,
+    "gather_size": 1578,
+    "label_fraction": 0.9740177439797212,
+    "snr_median": 10.030363537023506
+  },
+  {
+    "asset": "halfmile",
+    "difficulty": "medium",
+    "shot_array_index": 42,
+    "shot_id": 20021573,
+    "gather_size": 1578,
+    "label_fraction": 0.9569074778200254,
+    "snr_median": 5.693193993179014
+  },
+  {
+    "asset": "halfmile",
+    "difficulty": "hard",
+    "shot_array_index": 479,
+    "shot_id": 20241019,
+    "gather_size": 1604,
+    "label_fraction": 0.8447630922693267,
+    "snr_median": 4.874947478648604
+  },
+  {
+    "asset": "lalor",
+    "difficulty": "easy",
+    "shot_array_index": 313,
+    "shot_id": 346,
+    "gather_size": 2685,
+    "label_fraction": 0.36834264432029795,
+    "snr_median": 36.62978919283424
+  },
+  {
+    "asset": "lalor",
+    "difficulty": "medium",
+    "shot_array_index": 347,
+    "shot_id": 381,
+    "gather_size": 2685,
+    "label_fraction": 0.25996275605214153,
+    "snr_median": 18.890481655561047
+  },
+  {
+    "asset": "lalor",
+    "difficulty": "hard",
+    "shot_array_index": 443,
+    "shot_id": 477,
+    "gather_size": 2685,
+    "label_fraction": 0.3422718808193669,
+    "snr_median": 11.681442101975257
+  },
+  {
+    "asset": "sudbury",
+    "difficulty": "easy",
+    "shot_array_index": 543,
+    "shot_id": 610,
+    "gather_size": 1983,
+    "label_fraction": 0.15128593040847202,
+    "snr_median": 14.410096897902005
+  },
+  {
+    "asset": "sudbury",
+    "difficulty": "medium",
+    "shot_array_index": 633,
+    "shot_id": 703,
+    "gather_size": 1763,
+    "label_fraction": 0.16959727736812252,
+    "snr_median": 11.364014074944343
+  },
+  {
+    "asset": "sudbury",
+    "difficulty": "hard",
+    "shot_array_index": 78,
+    "shot_id": 83,
+    "gather_size": 1328,
+    "label_fraction": 0.11295180722891567,
+    "snr_median": 5.93608834481954
+  }
+]

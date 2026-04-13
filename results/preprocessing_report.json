@@ -1,0 +1,122 @@
+{
+  "assets": {
+    "brunswick": {
+      "n_shots": 1541,
+      "n_traces": 4496540,
+      "n_labeled": 3707228,
+      "label_fraction": 0.8245,
+      "median_fb_ms": 372.0,
+      "gather_size_range": [
+        2135,
+        3355
+      ],
+      "splits": {
+        "train": {
+          "n_shots": 1078,
+          "n_traces": 3144415,
+          "n_labeled": 2593966
+        },
+        "val": {
+          "n_shots": 231,
+          "n_traces": 682685,
+          "n_labeled": 553838
+        },
+        "test": {
+          "n_shots": 232,
+          "n_traces": 669440,
+          "n_labeled": 559424
+        }
+      }
+    },
+    "halfmile": {
+      "n_shots": 690,
+      "n_traces": 1099559,
+      "n_labeled": 975143,
+      "label_fraction": 0.8868,
+      "median_fb_ms": 339.5,
+      "gather_size_range": [
+        1575,
+        1604
+      ],
+      "splits": {
+        "train": {
+          "n_shots": 483,
+          "n_traces": 769435,
+          "n_labeled": 681790
+        },
+        "val": {
+          "n_shots": 103,
+          "n_traces": 164318,
+          "n_labeled": 145461
+        },
+        "test": {
+          "n_shots": 104,
+          "n_traces": 165806,
+          "n_labeled": 147892
+        }
+      }
+    },
+    "lalor": {
+      "n_shots": 905,
+      "n_traces": 2424921,
+      "n_labeled": 1203041,
+      "label_fraction": 0.4961,
+      "median_fb_ms": 252.0,
+      "gather_size_range": [
+        573,
+        2685
+      ],
+      "splits": {
+        "train": {
+          "n_shots": 635,
+          "n_traces": 1701506,
+          "n_labeled": 845041
+        },
+        "val": {
+          "n_shots": 136,
+          "n_traces": 363625,
+          "n_labeled": 184362
+        },
+        "test": {
+          "n_shots": 134,
+          "n_traces": 359790,
+          "n_labeled": 173638
+        }
+      }
+    },
+    "sudbury": {
+      "n_shots": 1016,
+      "n_traces": 1810220,
+      "n_labeled": 198805,
+      "label_fraction": 0.1098,
+      "median_fb_ms": 151.0,
+      "gather_size_range": [
+        670,
+        1983
+      ],
+      "splits": {
+        "train": {
+          "n_shots": 711,
+          "n_traces": 1265546,
+          "n_labeled": 140122
+        },
+        "val": {
+          "n_shots": 151,
+          "n_traces": 270268,
+          "n_labeled": 29335
+        },
+        "test": {
+          "n_shots": 154,
+          "n_traces": 274406,
+          "n_labeled": 29348
+        }
+      }
+    }
+  },
+  "total": {
+    "n_shots": 4152,
+    "n_traces": 9831240,
+    "n_labeled": 6084217,
+    "label_fraction": 0.6189
+  }
+}

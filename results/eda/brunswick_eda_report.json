@@ -1,0 +1,128 @@
+{
+  "asset": "brunswick",
+  "label_audit": {
+    "total_traces": 4496540,
+    "trace_duration_ms": 1500.0,
+    "count_spare1_zero": 0,
+    "count_spare1_neg1": 763319,
+    "count_other_negative": 0,
+    "count_labeled": 3733221,
+    "labeled_fraction": 0.8302430313085172,
+    "count_oob_labels": 0,
+    "count_suspicious_early": 0,
+    "fb_time_ms": {
+      "min": 4.0,
+      "max": 1358.0,
+      "mean": 429.27222819115184,
+      "median": 384.0,
+      "std": 229.56444516376504,
+      "p5": 120.0,
+      "p25": 258.0,
+      "p75": 570.0,
+      "p95": 874.0
+    }
+  },
+  "spare1_vs_fbt": {
+    "first_break_time_present": true,
+    "n_both_labeled": 0
+  },
+  "shot_gather_stats": {
+    "n_shots": 1541,
+    "shotid_vs_shotpeg_identical": false,
+    "gather_size": {
+      "min": 2135,
+      "max": 3355,
+      "mean": 2917.9364049318624,
+      "median": 2975.0,
+      "std": 363.6634403367517,
+      "p5": 2362.0,
+      "p95": 3354.0
+    },
+    "offset_range": {
+      "global_min": 2.0,
+      "global_max": 7188.224050487019
+    },
+    "label_coverage_per_shot": {
+      "n_zero_label_shots": 0,
+      "n_partial_label_shots": 1541,
+      "n_full_label_shots": 0
+    },
+    "geographic_extent": {
+      "src_x_min": 282028.0,
+      "src_x_max": 287692.0,
+      "src_y_min": 5252464.0,
+      "src_y_max": 5259491.0
+    }
+  },
+  "amplitude_stats": {
+    "n_sampled": 50000,
+    "amplitude_max": {
+      "min": 0.0005496223457157612,
+      "max": 609.8310546875,
+      "mean": 1.0835413924166792,
+      "median": 0.19076529145240784,
+      "std": 9.814097318562588
+    },
+    "amplitude_rms": {
+      "min": 0.00019120622891932726,
+      "max": 88.26325225830078,
+      "mean": 0.1240473933762114,
+      "median": 0.03077292162925005
+    },
+    "dead_traces_in_sample": 0,
+    "clipped_traces_in_sample": 0,
+    "dead_fraction_estimate": 0.0,
+    "clipped_fraction_estimate": 0.0
+  },
+  "snr_proxy": {
+    "snr_available": true,
+    "n_computed": 10000,
+    "snr_log10": {
+      "mean": 1.4836144599659815,
+      "median": 1.5683962032103786,
+      "std": 0.6259248657454045,
+      "p5": 0.2445450165013929,
+      "p95": 2.35415025539047
+    }
+  },
+  "label_quality": {
+    "label_quality_available": true,
+    "n_shots_checked": 200,
+    "n_eligible_shots": 1541,
+    "total_labeled_checked": 484018,
+    "total_outliers_3sigma": 1908,
+    "outlier_fraction": 0.003942002156944576,
+    "residual_stats": {
+      "mean": -4.502359833503e-14,
+      "std": 8.948151593354549,
+      "abs_median": 5.361347492870522,
+      "abs_p95": 17.16173598078769
+    }
+  },
+  "visualization_examples": [
+    {
+      "asset": "brunswick",
+      "difficulty": "easy",
+      "shot_array_index": 642,
+      "shot_id": 760,
+      "gather_size": 3346,
+      "label_fraction": 0.7450687387925882
+    },
+    {
+      "asset": "brunswick",
+      "difficulty": "medium",
+      "shot_array_index": 440,
+      "shot_id": 514,
+      "gather_size": 3115,
+      "label_fraction": 0.7293739967897271
+    },
+    {
+      "asset": "brunswick",
+      "difficulty": "hard",
+      "shot_array_index": 122,
+      "shot_id": 144,
+      "gather_size": 2582,
+      "label_fraction": 0.7970565453137103
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "asset": "lalor",
+  "label_audit": {
+    "total_traces": 2424923,
+    "trace_duration_ms": 1500.0,
+    "count_spare1_zero": 0,
+    "count_spare1_neg1": 1213066,
+    "count_other_negative": 0,
+    "count_labeled": 1211857,
+    "labeled_fraction": 0.4997507137340031,
+    "count_oob_labels": 0,
+    "count_suspicious_early": 0,
+    "fb_time_ms": {
+      "min": 2.0,
+      "max": 881.0,
+      "mean": 249.21832113855018,
+      "median": 248.0,
+      "std": 109.29450079647651,
+      "p5": 74.0,
+      "p25": 166.0,
+      "p75": 333.0,
+      "p95": 415.0
+    }
+  },
+  "spare1_vs_fbt": {
+    "first_break_time_present": true,
+    "n_both_labeled": 0
+  },
+  "shot_gather_stats": {
+    "n_shots": 907,
+    "shotid_vs_shotpeg_identical": false,
+    "gather_size": {
+      "min": 1,
+      "max": 2685,
+      "mean": 2673.564498346196,
+      "median": 2685.0,
+      "std": 159.06050306374513,
+      "p5": 2685.0,
+      "p95": 2685.0
+    },
+    "offset_range": {
+      "global_min": 0.09999999999990905,
+      "global_max": 5782.660593533049
+    },
+    "label_coverage_per_shot": {
+      "n_zero_label_shots": 2,
+      "n_partial_label_shots": 905,
+      "n_full_label_shots": 0
+    },
+    "geographic_extent": {
+      "src_x_min": 724.3,
+      "src_x_max": 5558.9,
+      "src_y_min": 8762.1,
+      "src_y_max": 14472.6
+    }
+  },
+  "amplitude_stats": {
+    "n_sampled": 50000,
+    "amplitude_max": {
+      "min": 0.0,
+      "max": 2307.244873046875,
+      "mean": 4.034887057256326,
+      "median": 0.33717069029808044,
+      "std": 55.25466710557851
+    },
+    "amplitude_rms": {
+      "min": 0.0,
+      "max": 336.010986328125,
+      "mean": 0.44182761950907296,
+      "median": 0.05211227014660835
+    },
+    "dead_traces_in_sample": 6,
+    "clipped_traces_in_sample": 0,
+    "dead_fraction_estimate": 0.00012,
+    "clipped_fraction_estimate": 0.0
+  },
+  "snr_proxy": {
+    "snr_available": true,
+    "n_computed": 10000,
+    "snr_log10": {
+      "mean": 2.406078183802753,
+      "median": 2.254651898400919,
+      "std": 1.1519059072608313,
+      "p5": 0.8159215282966312,
+      "p95": 4.512834587864223
+    }
+  },
+  "label_quality": {
+    "label_quality_available": true,
+    "n_shots_checked": 200,
+    "n_eligible_shots": 905,
+    "total_labeled_checked": 261879,
+    "total_outliers_3sigma": 3623,
+    "outlier_fraction": 0.013834633552136674,
+    "residual_stats": {
+      "mean": -2.4043720600780146e-14,
+      "std": 8.371972250296848,
+      "abs_median": 4.587658117015536,
+      "abs_p95": 16.080792850320183
+    }
+  },
+  "visualization_examples": [
+    {
+      "asset": "lalor",
+      "difficulty": "easy",
+      "shot_array_index": 860,
+      "shot_id": 910,
+      "gather_size": 2685,
+      "label_fraction": 0.5936685288640596
+    },
+    {
+      "asset": "lalor",
+      "difficulty": "medium",
+      "shot_array_index": 395,
+      "shot_id": 429,
+      "gather_size": 2685,
+      "label_fraction": 0.5083798882681564
+    },
+    {
+      "asset": "lalor",
+      "difficulty": "hard",
+      "shot_array_index": 872,
+      "shot_id": 922,
+      "gather_size": 2685,
+      "label_fraction": 0.7087523277467411
+    }
+  ]
+}

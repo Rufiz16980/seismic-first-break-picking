@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -16,12 +16,17 @@ DIRS = [
     "documentation/implementation_phases",
     "mlruns",
     "models/checkpoints",
+    "models/checkpoints/unet",
+    "models/checkpoints/resnet_unet",
+    "models/checkpoints/1dcnn",
+    "models/checkpoints/classical",
     "models/final",
     "notebooks",
     "results",
     "results/sanity_plots",
     "results/eda_plots",
     "results/benchmark",
+    "results/visualization_examples",
     "src/data",
     "src/models",
     "src/training",

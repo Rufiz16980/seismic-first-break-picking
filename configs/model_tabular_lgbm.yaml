@@ -1,0 +1,23 @@
+experiment:
+  name: tabular_lgbm
+  seed: 42
+  asset: all
+  framing: trace
+data:
+  index_csv: data/processed/split_index.csv
+  processed_dir: data/processed/
+  target_n_samples: 1500
+  target_n_traces: 120
+  normalization: per_trace
+  cache_in_ram: false
+model:
+  architecture: lightgbm
+  n_estimators: 500
+  learning_rate: 0.05
+  max_depth: 15
+training:
+  batch_size: 256
+  epochs: 1
+output:
+  tracking_uri: mlruns
+  checkpoint_dir: models/tabular_lgbm

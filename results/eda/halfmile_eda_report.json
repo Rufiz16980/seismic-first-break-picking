@@ -1,0 +1,128 @@
+{
+  "asset": "halfmile",
+  "label_audit": {
+    "total_traces": 1099559,
+    "trace_duration_ms": 1500.0,
+    "count_spare1_zero": 0,
+    "count_spare1_neg1": 106370,
+    "count_other_negative": 0,
+    "count_labeled": 993189,
+    "labeled_fraction": 0.9032612165422683,
+    "count_oob_labels": 0,
+    "count_suspicious_early": 0,
+    "fb_time_ms": {
+      "min": 11.0,
+      "max": 1482.0,
+      "mean": 353.13856979890033,
+      "median": 344.0,
+      "std": 154.91804985078338,
+      "p5": 118.0,
+      "p25": 238.0,
+      "p75": 454.0,
+      "p95": 632.0
+    }
+  },
+  "spare1_vs_fbt": {
+    "first_break_time_present": true,
+    "n_both_labeled": 0
+  },
+  "shot_gather_stats": {
+    "n_shots": 690,
+    "shotid_vs_shotpeg_identical": true,
+    "gather_size": {
+      "min": 1575,
+      "max": 1604,
+      "mean": 1593.5637681159421,
+      "median": 1604.0,
+      "std": 12.42494535041191,
+      "p5": 1578.0,
+      "p95": 1604.0
+    },
+    "offset_range": {
+      "global_min": 0.0,
+      "global_max": 4865.900327791353
+    },
+    "label_coverage_per_shot": {
+      "n_zero_label_shots": 0,
+      "n_partial_label_shots": 690,
+      "n_full_label_shots": 0
+    },
+    "geographic_extent": {
+      "src_x_min": 698487.0,
+      "src_x_max": 704570.0,
+      "src_y_min": 5241860.0,
+      "src_y_max": 5247875.0
+    }
+  },
+  "amplitude_stats": {
+    "n_sampled": 50000,
+    "amplitude_max": {
+      "min": 0.0,
+      "max": 153.29879760742188,
+      "mean": 0.5637369250577875,
+      "median": 0.07727807760238647,
+      "std": 4.942274427108218
+    },
+    "amplitude_rms": {
+      "min": 0.0,
+      "max": 40.493438720703125,
+      "mean": 0.07272077887035557,
+      "median": 0.013109635561704636
+    },
+    "dead_traces_in_sample": 679,
+    "clipped_traces_in_sample": 0,
+    "dead_fraction_estimate": 0.01358,
+    "clipped_fraction_estimate": 0.0
+  },
+  "snr_proxy": {
+    "snr_available": true,
+    "n_computed": 10000,
+    "snr_log10": {
+      "mean": 1.2352335572602413,
+      "median": 1.2467191425980437,
+      "std": 0.6136487153287701,
+      "p5": 0.23731083247044252,
+      "p95": 2.1955308536679365
+    }
+  },
+  "label_quality": {
+    "label_quality_available": true,
+    "n_shots_checked": 200,
+    "n_eligible_shots": 690,
+    "total_labeled_checked": 287865,
+    "total_outliers_3sigma": 1354,
+    "outlier_fraction": 0.00470359369843503,
+    "residual_stats": {
+      "mean": -3.703742731908566e-14,
+      "std": 7.615101085419341,
+      "abs_median": 4.686045674406017,
+      "abs_p95": 14.973352970987957
+    }
+  },
+  "visualization_examples": [
+    {
+      "asset": "halfmile",
+      "difficulty": "easy",
+      "shot_array_index": 654,
+      "shot_id": 20301261,
+      "gather_size": 1604,
+      "label_fraction": 0.8534912718204489
+    },
+    {
+      "asset": "halfmile",
+      "difficulty": "medium",
+      "shot_array_index": 383,
+      "shot_id": 20181346,
+      "gather_size": 1604,
+      "label_fraction": 0.9114713216957606
+    },
+    {
+      "asset": "halfmile",
+      "difficulty": "hard",
+      "shot_array_index": 28,
+      "shot_id": 20021527,
+      "gather_size": 1578,
+      "label_fraction": 0.9683143219264893
+    }
+  ]
+}

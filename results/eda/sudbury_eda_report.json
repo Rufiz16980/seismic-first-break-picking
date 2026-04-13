@@ -1,0 +1,128 @@
+{
+  "asset": "sudbury",
+  "label_audit": {
+    "total_traces": 1810220,
+    "trace_duration_ms": 2000.0,
+    "count_spare1_zero": 1609882,
+    "count_spare1_neg1": 0,
+    "count_other_negative": 0,
+    "count_labeled": 200338,
+    "labeled_fraction": 0.11067052623438035,
+    "count_oob_labels": 0,
+    "count_suspicious_early": 0,
+    "fb_time_ms": {
+      "min": 10.0,
+      "max": 599.0,
+      "mean": 169.7062863760245,
+      "median": 162.0,
+      "std": 71.33397158098745,
+      "p5": 67.0,
+      "p25": 121.0,
+      "p75": 206.0,
+      "p95": 307.0
+    }
+  },
+  "spare1_vs_fbt": {
+    "first_break_time_present": true,
+    "n_both_labeled": 0
+  },
+  "shot_gather_stats": {
+    "n_shots": 1016,
+    "shotid_vs_shotpeg_identical": false,
+    "gather_size": {
+      "min": 670,
+      "max": 1983,
+      "mean": 1781.7125984251968,
+      "median": 1763.0,
+      "std": 223.8364052114236,
+      "p5": 1328.0,
+      "p95": 1983.0
+    },
+    "offset_range": {
+      "global_min": 31622.776601683792,
+      "global_max": 71556769.54425766
+    },
+    "label_coverage_per_shot": {
+      "n_zero_label_shots": 301,
+      "n_partial_label_shots": 715,
+      "n_full_label_shots": 0
+    },
+    "geographic_extent": {
+      "src_x_min": 4577475000.0,
+      "src_x_max": 4647828100.0,
+      "src_y_min": 51479425000.0,
+      "src_y_max": 51548550000.0
+    }
+  },
+  "amplitude_stats": {
+    "n_sampled": 50000,
+    "amplitude_max": {
+      "min": 0.0003413709346204996,
+      "max": 127.99998474121094,
+      "mean": 0.5049448249112581,
+      "median": 0.0925552248954773,
+      "std": 3.7923337317611434
+    },
+    "amplitude_rms": {
+      "min": 0.00010950215073535219,
+      "max": 32.94196319580078,
+      "mean": 0.06772178860832267,
+      "median": 0.017214110121130943
+    },
+    "dead_traces_in_sample": 0,
+    "clipped_traces_in_sample": 0,
+    "dead_fraction_estimate": 0.0,
+    "clipped_fraction_estimate": 0.0
+  },
+  "snr_proxy": {
+    "snr_available": true,
+    "n_computed": 10000,
+    "snr_log10": {
+      "mean": 1.7793325939914402,
+      "median": 1.7964941171787718,
+      "std": 0.7337023618834372,
+      "p5": 0.4962225672567232,
+      "p95": 2.9371077073760326
+    }
+  },
+  "label_quality": {
+    "label_quality_available": true,
+    "n_shots_checked": 200,
+    "n_eligible_shots": 715,
+    "total_labeled_checked": 55085,
+    "total_outliers_3sigma": 619,
+    "outlier_fraction": 0.011237178905328129,
+    "residual_stats": {
+      "mean": 5.931487185475619e-14,
+      "std": 6.788469288202741,
+      "abs_median": 3.2031679946029215,
+      "abs_p95": 12.636225149994983
+    }
+  },
+  "visualization_examples": [
+    {
+      "asset": "sudbury",
+      "difficulty": "easy",
+      "shot_array_index": 213,
+      "shot_id": 243,
+      "gather_size": 1983,
+      "label_fraction": 0.1507816439737771
+    },
+    {
+      "asset": "sudbury",
+      "difficulty": "medium",
+      "shot_array_index": 775,
+      "shot_id": 866,
+      "gather_size": 1763,
+      "label_fraction": 0.06182643221781055
+    },
+    {
+      "asset": "sudbury",
+      "difficulty": "hard",
+      "shot_array_index": 114,
+      "shot_id": 122,
+      "gather_size": 1510,
+      "label_fraction": 0.19337748344370861
+    }
+  ]
+}

@@ -1,40 +1,34 @@
-﻿# Current Project Status
+# Current Project Status
 
-**Last Updated:** 2026-04-09 23:30 Asia/Baku
-**Last Agent Session:** Phase 0.5 bootstrap, status initialization, and environment verification notebook creation
+**Last Updated:** 2026-04-10 15:00 Asia/Baku
+**Last Agent Session:** Phase 2 preprocessing pipeline implementation
 
 ## Completed
-- Google Drive repo location established at `G:\My Drive\seismic-first-break-picking`
-- Repository directory structure created for data, source, notebooks, models, results, configs, scripts, and documentation
-- `.gitignore` expanded beyond Google Drive temp folders to cover large data, model artifacts, Python caches, notebook checkpoints, OS files, and `venv/`
-- Git initialized in the Drive repo
-- Initial local development virtual environment created and minimal local dependencies installed
-- `scripts/create_folder_structure.py` added and run successfully
-
-## Just Completed This Session
-- Read `documentation/Meta_Plan_Agent.md` and `documentation/plan_phases/Phase_0.5.md`
-- Verified current Drive repo contents and documentation layout
-- Created `documentation/implementation_phases/Impl_Phase_0.5.md`
-- Created `notebooks/00_environment_setup.ipynb`
-- Initialized this handoff file with the exact Gate 1 requirements
-- Noted that `documentation/plan_phases/Phase_0.md` is referenced by the meta plan but is not present in the repo
+- Phase 0: Repository structure, configs, placeholder modules
+- Phase 0.5: Environment setup, data download, extraction, structural audit, sanity plots
+- Phase 1: Full EDA (5 per-asset notebooks + shared utility module + cross-dataset analysis)
+- Phase 1 Supplementary: All review gaps resolved
+- Phase 2: Preprocessing Pipeline completed (notebook executed, dataset stratified and packed to NPZ)
+- Implemented `src/data/shot_gather_builder.py` — core pipeline (harmonize → normalize → NPZ → CSV → split)
+- Implemented `src/data/transforms.py` — 5 composable seismic augmentation classes
+- Implemented `src/data/dataset.py` — PyTorch Dataset, variable-width collate, balanced sampler
+- Implemented `src/utils/config_loader.py` — YAML loading + path resolution
+- Generated `notebooks/02_preprocessing_pipeline.ipynb` (11 cells, rerun-safe)
+- Created `documentation/implementation_phases/Impl_Phase_2.md` (full report: 12 decisions, 6 deviations, EDA integration matrix)
+- Added batching strategy to Phase 1 Supplementary Decision Register
 
 ## Current Status
-BLOCKED
+**PHASE 3 & 4: IMPLEMENTATION COMPLETE - AWAITING EXECUTION & REVIEW**
 
-## Blocked On (if applicable)
-- User must run `notebooks/00_environment_setup.ipynb` in Google Colab from top to bottom
-- User must confirm the notebook ends with the printed message `PHASE 0.5 COMPLETE`
-- User must paste back the contents of `results/00_environment_report.json`
-- User must report any download, decompression, package installation, or HDF5 verification failures shown in the notebook output
-- If any asset fails Cell 6 structural verification, stop and paste the failing asset name plus the missing key or inconsistency before proceeding
+The core architectural and training infrastructure for Phase 3 and Phase 4 is finished, but formal "completion" is pending the user's review of the design and the successful execution of the training notebooks.
+- **Batch 1 (Architecture & Losses):** Implemented `SoftArgmaxUNet` capable of ingesting variable-width batches. Implemented masked physical metrics (`MaskedMAE` / `MaskedHuber` / `STA/LTA` Baselines).
+- **Batch 2 (Training Infrastructure):** Configured Colab constraints. Embedded PyTorch Mixed-Precision (`AMP`), `GradScaler`, and global clipping within a structured `Trainer` epoch loop.
+- **Review 1 Fixes Applied:** The implementation was refactored exactly to address Review 1 specifications. The monolithic notebook was deleted and explicitly modularized into `03_train_unet.ipynb` with exact 10-Cell mapping. The Rerun-Safe state machine check was heavily integrated into Cell 6. Zero-gradient scaling flaws were patched inside the trainer loop (`AMP mask.any() skip`). The pooling justification logic was entirely inverted and verified for correctness.
+
+## Blocked On
+**User Review & Training Run:** Waiting for the user to execute the modular `03_train_unet.ipynb` pipeline to verify convergence.
 
 ## Next Agent Session Should
-- Read `documentation/Meta_Plan_Agent.md`
-- Read `CURRENT_STATUS.md`
-- Read `results/00_environment_report.json` once the user provides it
-- Read `documentation/implementation_phases/Impl_Phase_0.5.md`
-- Begin Phase 1 implementation only after all four assets pass the environment verification notebook
-
-## Open Questions Requiring User Decision
-- `documentation/plan_phases/Phase_0.md` is referenced by the meta plan and repo structure notes but is not present. If you have it elsewhere, add it to the repo before later sessions rely on it.
+1. Instruct the user to upload the updated repository to Google Drive and execute `notebooks/03_train_unet.ipynb` inside a Colab T4 GPU Session.
+2. Read the final results from `mlruns/` or the CSV execution logs.
+3. If the Soft-Argmax model fails to converge, begin hyperparameter sweeps using Optuna as outlined in Phase 4.7.
