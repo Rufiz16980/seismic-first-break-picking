@@ -1,7 +1,8 @@
 # Automated Seismic First Break Picking
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Rufiz16980/seismic-first-break-picking/blob/main/LICENSE) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![Benchmark](https://img.shields.io/badge/Benchmark-HardPicks-informational) ![Status](https://img.shields.io/badge/Status-Research%20Prototype-orange)
 *A Deep Learning Pipeline for Hard-Rock Seismic Exploration*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Rufiz16980/seismic-first-break-picking/blob/main/LICENSE) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-ee4c2c) ![MLflow](https://img.shields.io/badge/MLflow-Experiment%20Tracking-0194E2) ![NumPy](https://img.shields.io/badge/NumPy-Scientific%20Computing-013243) ![SciPy](https://img.shields.io/badge/SciPy-Signal%20Processing-8CAAE6) ![Benchmark](https://img.shields.io/badge/Benchmark-HardPicks-informational) ![Status](https://img.shields.io/badge/Status-Research%20Prototype-orange)
 
 Automated seismic first-break picking is the task of marking, for every receiver trace in a seismic survey, the earliest physically meaningful arrival of wave energy. In mining geophysics this is a foundational preprocessing step: if the first breaks are wrong, static corrections, near-surface velocity estimates, and ultimately the deeper image of the subsurface are all degraded.
 
