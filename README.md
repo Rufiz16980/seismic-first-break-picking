@@ -2,7 +2,9 @@
 ## A Deep Learning Pipeline for Hard-Rock Seismic Exploration
 
 Saved sanity plot: /content/drive/MyDrive/seismic-first-break-picking/results/sanity_plots/00_first_traces.png
-This plot shows how representative traces from the four datasets look before any model sees them. Repo-relative path: `results/sanity_plots/00_first_traces.png`.
+This figure is produced by the very first verification notebook and is the first visual sanity check in the project. It shows representative raw traces from Brunswick, Halfmile, Lalor, and Sudbury before preprocessing, so the reader can immediately see that the surveys do not have the same amplitude character, noise floor, or waveform shape. Repo-relative path: `results/sanity_plots/00_first_traces.png`.
+
+![Raw trace sanity plot](results/sanity_plots/00_first_traces.png)
 
 ---
 
@@ -291,6 +293,12 @@ Why it mattered:
 - It justified balanced multi-asset sampling.
 - It justified building both 1D and 2D pipelines rather than only one framing.
 - It made clear that evaluation claims must be separated into internal-split and future cross-survey benchmark claims.
+
+![Combined first-break statistics](results/eda_plots/combined/combined_fb_stats.png)
+
+![Combined gather-size comparison](results/eda_plots/combined/combined_gather_sizes.png)
+
+![Lalor resampling comparison](results/eda_plots/supplementary/sec5_resampling_comparison.png)
 
 ### 7.6 Supplementary notebook
 
@@ -656,12 +664,20 @@ They are excellent for comparing models in this repository, but they are **not**
 | 4 | CNN-1D | 148.593 | 313.027 | 2.32 | 4.61 | 0.0578 |
 | 5 | ResNet-1D | 148.720 | 318.403 | 2.35 | 4.69 | 0.0694 |
 
-### Key artifact paths for the top two models
+### Key embedded figures for the top results
 
-- ResNet-UNet training curve: `artifacts/plots/ResNet_UNet/training_curve.png`
-- UNet-2D training curve: `artifacts/plots/UNet_2D/training_curve.png`
-- ResNet-UNet test scatter: `artifacts/plots/ResNet_UNet/test_scatter.png`
-- UNet-2D test scatter: `artifacts/plots/UNet_2D/test_scatter.png`
+- ResNet-UNet training curve: `results/benchmark/resnet_unet_training_curve.png`
+- UNet-2D training curve: `results/benchmark/unet_2d_training_curve.png`
+- Leaderboard comparison: `results/benchmark/val_vs_test_leaderboard.png`
+- Accuracy-latency Pareto plot: `results/benchmark/deployment_pareto.png`
+
+![ResNet-UNet training curve](results/benchmark/resnet_unet_training_curve.png)
+
+![UNet-2D training curve](results/benchmark/unet_2d_training_curve.png)
+
+![Validation vs test leaderboard](results/benchmark/val_vs_test_leaderboard.png)
+
+![Accuracy-latency Pareto frontier](results/benchmark/deployment_pareto.png)
 
 ---
 
@@ -828,16 +844,16 @@ Because the current repository table uses an internal split rather than leave-on
 3. `results/eda_plots/combined/combined_fb_stats.png`
    - Good summary of how first-break statistics differ across assets.
 
-4. `artifacts/plots/leaderboard/val_vs_test_leaderboard.png`
+4. `results/benchmark/val_vs_test_leaderboard.png`
    - Best single plot for communicating model ranking.
 
-5. `artifacts/plots/leaderboard/deployment_pareto.png`
+5. `results/benchmark/deployment_pareto.png`
    - Best plot for accuracy-versus-speed discussion.
 
-6. `artifacts/plots/ResNet_UNet/training_curve.png`
+6. `results/benchmark/resnet_unet_training_curve.png`
    - Should be shown when discussing the winning model's convergence.
 
-7. `artifacts/plots/UNet_2D/training_curve.png`
+7. `results/benchmark/unet_2d_training_curve.png`
    - Useful side-by-side with the winner to show what weaker optimization looks like.
 
 8. `artifacts/plots/ResNet_UNet/test_scatter.png`
@@ -960,3 +976,4 @@ Allen, R. V. (1978). Automatic earthquake recognition and timing from single tra
 Allen, R. V. (1982). Automatic phase pickers: Their present use and future prospects. *Bulletin of the Seismological Society of America*, 72(6B), S225-S242.
 
 Sabbione, J. I., & Velis, D. (2010). Automatic first-breaks picking: New strategies and algorithms. *Geophysics*, 75(4), V67-V76.
+
