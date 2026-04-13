@@ -553,14 +553,21 @@ Comparing several architectures is not redundancy; it is the scientific point. T
 
 Before running the benchmark, the project had several reasonable hypotheses:
 
+- **A classical STA/LTA-style picker** should define a non-learned floor: it can recover obvious high-SNR arrivals, but it should struggle on ambiguous or noisy traces because it has no gather context and no learned survey adaptation.
 - **Trace-only neural models** should learn local onset texture, but they should plateau because they cannot see the neighboring-trace moveout curve and do not explicitly ingest offset.
 - **Gather-level 2D models** should outperform 1D models because the first-break curve is a spatial object, not just a per-trace local event.
 - **A pretrained 2D model** should optimize faster than a randomly initialized 2D model because the encoder begins with useful edge and boundary detectors.
-- **A purely tabular baseline** should benefit from offset and simple handcrafted features, but it would still sacrifice raw gather context. The codebase contains such a direction in `src/features/` and `src/models/tabular.py`, but the current benchmark tables focus on the five trained neural models.
+- **A purely tabular baseline** should benefit from offset and simple handcrafted features, but it would still sacrifice raw gather context. The codebase contains such a direction in `src/features/` and `src/models/tabular.py`, but the current benchmark tables focus on the main neural models plus a logged classical reference.
 
 These hypotheses matter because they make the analysis section more than post-hoc storytelling. The benchmark is testing concrete representation claims.
 
-### 10.3 1D neural models
+### 10.3 Classical signal-processing baselines
+
+The codebase includes classical pickers in `src/models/classical.py`, including STA/LTA, MER, and AIC. These methods do not learn weights; they apply deterministic onset rules directly to each trace and are useful as a non-learned reference floor.
+
+The currently logged classical comparison run in the repository is the `STA/LTA` baseline. Conceptually, it compares short-term trace energy against long-term background energy and marks the first-break candidate when the ratio rises sharply. That makes it fast and physically interpretable, but it also means the method has no learned survey adaptation and no cross-trace context.
+
+### 10.4 1D neural models
 
 The trace-level neural models are implemented mainly in `src/models/cnn_1d.py` and `src/models/unet_1d.py`.
 
@@ -588,7 +595,7 @@ The trace-level neural models are implemented mainly in `src/models/cnn_1d.py` a
 
 The central limitation of the current 1D family should be stated plainly: these models operate on waveform shape only and do **not** explicitly ingest offset as an additional input. They therefore give up the strongest physical prior available to the problem and must infer arrival timing from local trace appearance alone.
 
-### 10.4 2D gather-level models
+### 10.5 2D gather-level models
 
 The main gather-level models live in `src/models/unet.py`.
 
@@ -612,13 +619,13 @@ The training notebook reports about `24.44M` trainable parameters for this model
 
 These models are scientifically attractive because one forward pass predicts all traces in a gather and can exploit the smooth cross-trace arrival structure directly.
 
-### 10.5 Symmetric versus asymmetric pooling
+### 10.6 Symmetric versus asymmetric pooling
 
 This project deliberately uses **symmetric pooling** in time and width for the custom 2D U-Net. That choice deserves explanation because some seismic U-Net variants prefer to preserve the width dimension more aggressively.
 
 In this repository, preserving thousands of trace columns deep into the bottleneck would make Brunswick-scale gathers prohibitively expensive on T4-class hardware. Symmetric `(2, 2)` pooling was therefore the pragmatic choice: it reduces both time and width through the encoder, keeps the model trainable on wide gathers, and avoids catastrophic out-of-memory behavior.
 
-### 10.6 Why the Soft-Argmax head matters
+### 10.7 Why the Soft-Argmax head matters
 
 The Soft-Argmax head is one of the most important design choices in the project.
 
@@ -627,7 +634,7 @@ Instead of emitting an unconstrained scalar with no temporal structure, the mode
 - it keeps the output aligned with the physical time axis,
 - it avoids forcing a brittle hard segmentation boundary in noisy, independently normalized traces.
 
-### 10.7 The computer-vision versus tabular-data tension appears again here
+### 10.8 The computer-vision versus tabular-data tension appears again here
 
 The 2D models are effectively computer-vision systems on ordered shot gathers. The geometric metadata enters mainly by determining the trace ordering and offset structure that makes the gather image meaningful. The current 1D neural models, by contrast, see only the waveform column and therefore miss explicit geometric priors.
 
@@ -780,7 +787,7 @@ That means the leaderboard is best read as a strong internal comparison, not as 
 
 ## 13. Results on the Current Repository Split
 
-The results below come from `notebooks/04_benchmark_and_compare.ipynb` and summarize the five neural models that were actually trained and exported in the benchmark notebook.
+The results below come from `notebooks/04_benchmark_and_compare.ipynb` and the repository's MLflow logs. Together they summarize the five neural models exported by the benchmark notebook plus one logged classical `STA/LTA` reference on the validation side.
 
 ### 13.1 Aggregate leaderboard
 
@@ -793,6 +800,9 @@ The results below come from `notebooks/04_benchmark_and_compare.ipynb` and summa
 | 3 | UNet-1D | 151.323 | 323.797 | 2.35 | 4.71 | 0.1917 |
 | 4 | CNN-1D | 151.551 | 320.712 | 2.25 | 4.50 | 0.0542 |
 | 5 | ResNet-1D | 151.853 | 326.232 | 2.30 | 4.60 | 0.0707 |
+| 6 | STA/LTA (classical) | 196.872 | 448.000 | 2.63 | 5.35 | 0.0640 |
+
+The classical line is worth keeping in view. `STA/LTA` is fully non-learned and very fast, but its validation MAE of `196.872 ms` sits well behind every learned model on aggregate error. That means the neural families are not merely reproducing a simple onset heuristic; they are learning signal that the heuristic cannot capture consistently.
 
 #### Test leaderboard
 
@@ -819,17 +829,19 @@ The benchmark notebook exports only aggregate validation and test leaderboards. 
 | UNet-1D | 174.3 | 117.8 | 132.1 | 218.6 |
 | CNN-1D | 265.6 | 197.7 | 100.6 | 68.3 |
 | ResNet-1D | 236.0 | 169.6 | 99.8 | 92.5 |
+| STA/LTA (classical) | 229.2 | 161.1 | 134.4 | 155.7 |
 
 Two patterns are immediately visible:
 
 - the winning ResNet-UNet is not just best on one asset; it is strongest across all four validation splits,
-- the 1D models behave inconsistently by asset, but none of them approaches the 2D winner overall.
+- the 1D models behave inconsistently by asset, but none of them approaches the 2D winner overall,
+- the classical STA/LTA reference remains a useful floor, but it stays firmly in the single-trace regime and never approaches the gather-level models.
 
 ### 13.3 How to read these numbers relative to the literature
 
 The `26.333 ms` test MAE for the current winner should be interpreted carefully. It is a strong result for a multi-asset, 30-epoch, internally held-out benchmark with no exhaustive hyperparameter search, but it is **not** a direct substitute for published HardPicks numbers because those papers typically report results under the official leave-one-survey-out protocol and often in sample- or pixel-based tolerances.
 
-That means the right conclusion is not "this is state of the art on HardPicks." The right conclusion is: **under the repository's current internal split, gather-level 2D regression models are decisively stronger than the current 1D trace-only neural families, and a pretrained ResNet-UNet is the clear winner.**
+That means the right conclusion is not "this is state of the art on HardPicks." The right conclusion is: **under the repository's current internal split, gather-level 2D regression models are decisively stronger than both the logged classical STA/LTA reference and the trace-only neural families, and a pretrained ResNet-UNet is the clear winner.**
 
 ---
 
@@ -837,7 +849,17 @@ That means the right conclusion is not "this is state of the art on HardPicks." 
 
 ### 14.1 The performance gap is large, not marginal
 
-The most important quantitative result in the repository is the size of the 2D versus 1D gap.
+The most important quantitative result in the repository is the hierarchy between the classical single-trace heuristic, the learned 1D family, and the learned 2D family.
+
+On validation, where the logged classical comparison is available:
+
+- Logged classical STA/LTA reference: `196.872 ms` MAE.
+- Best 1D neural model: `151.323 ms` MAE.
+- Best 2D model: `27.416 ms` MAE.
+- Classical -> best 1D reduction: `45.549 ms`, or about **23% lower** MAE.
+- Best 1D -> best 2D reduction: `123.907 ms`, or about **82% lower** MAE.
+
+On test, where only the neural families are exported:
 
 - Best 2D model: `26.333 ms` test MAE.
 - Best 1D model: `146.866 ms` test MAE.
@@ -846,6 +868,7 @@ The most important quantitative result in the repository is the size of the 2D v
 - Within-10 ms accuracy: `40.84%` for the winner versus `4.88%` for the best 1D model, which is about **8.4x higher**.
 
 Those are not small improvements from tuning. They are evidence that the representation itself matters.
+
 
 ### 14.2 Why the pretrained ResNet-UNet won
 
@@ -891,6 +914,8 @@ The UNet-2D histogram makes the heavy-tail problem easier to see. The model bene
 
 The 1D models did not fail in the sense of broken training. They trained, converged, and produced stable but mediocre results. The scientific lesson is more interesting: **in this preprocessing regime, single-trace modeling is not enough.**
 
+The logged classical STA/LTA reference sharpens that interpretation. The 1D neural family does beat a non-learned single-trace heuristic on aggregate MAE, but it remains far closer to that regime than to the 2D family. Interestingly, the classical baseline still lands in the same ballpark on strict `5 ms` and `10 ms` hit-rate thresholds, which suggests that simple onset heuristics can still lock onto obvious arrivals while failing badly on difficult traces and producing much heavier tails.
+
 Three independent 1D families cluster in almost the same range:
 
 - UNet-1D: `146.866 ms` test MAE,
@@ -910,7 +935,7 @@ The per-asset validation tables suggest a more nuanced story than the aggregate 
 
 - **Brunswick** is the hardest place for the 1D models. That is consistent with very late arrivals and extremely wide gathers, where cross-trace structure carries a lot of information.
 - **Halfmile** is geometrically regular and well labeled, yet the 1D models still lag badly. That supports the claim that geometry alone is not enough; the model must also see the gather context.
-- **Lalor** is relatively favorable to all models compared with Brunswick, likely because the arrival is often locally strong even though the survey needed resampling and careful label handling.
+- **Lalor** is relatively favorable to all models compared with Brunswick, likely because the arrival is often locally strong even though the survey needed resampling and careful label handling. It is also the asset where the classical STA/LTA baseline remains comparatively most competitive.
 - **Sudbury** shows why masking rather than deletion mattered. The winning 2D model remains strong despite the label sparsity, which suggests that preserving unlabeled traces as context was scientifically worthwhile.
 
 ### 14.7 How these findings connect to prior work
@@ -939,7 +964,7 @@ What the repository contributes right now is not a new official benchmark record
 
 ![Accuracy-latency Pareto view of the benchmarked models](results/benchmark/deployment_pareto.png)
 
-This plot is important because it shows that the most accurate model is not a deployment disaster. The ResNet-UNet sits near the efficient frontier: it is far more accurate than every 1D model while remaining only modestly slower than the faster 1D baselines.
+This plot is important because it shows that the most accurate model is not a deployment disaster. The ResNet-UNet sits near the efficient frontier: it is far more accurate than every 1D model while remaining only modestly slower than the faster 1D baselines. For reference, the logged classical STA/LTA run measures `0.0640 ms/trace` on validation, which places it in roughly the same speed regime as the fast single-trace learned baselines but at much worse aggregate error.
 
 ### 15.2 Why latency behaves this way
 
@@ -1076,3 +1101,6 @@ Allen, R. V. (1978). *Automatic earthquake recognition and timing from single tr
 Allen, R. V. (1982). *Automatic phase pickers: Their present use and future prospects*. Bulletin of the Seismological Society of America, 72(6B), S225-S242.
 
 Sabbione, J. I., & Velis, D. (2010). *Automatic first-breaks picking: New strategies and algorithms*. Geophysics, 75(4), V67-V76.
+
+
+
