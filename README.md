@@ -9,7 +9,10 @@ The main technical question is not only whether deep learning can pick first bre
 
 ## Table of Contents
 
-1. [Project Summary](#1-project-summary)`r`n2. [The Scientific Problem](#2-the-scientific-problem)`r`n3. [The HardPicks Datasets](#3-the-hardpicks-datasets)`r`n4. [Current Status and Scope](#4-current-status-and-scope)
+1. [Project Summary](#1-project-summary)
+2. [The Scientific Problem](#2-the-scientific-problem)
+3. [The HardPicks Datasets](#3-the-hardpicks-datasets)
+4. [Current Status and Scope](#4-current-status-and-scope)
 5. [How 3D Surveys Become 2D Images and 1D Traces](#5-how-3d-surveys-become-2d-images-and-1d-traces)
 6. [Data Fields Used by the Pipeline](#6-data-fields-used-by-the-pipeline)
 7. [EDA Notebook-by-Notebook Findings](#7-eda-notebook-by-notebook-findings)
@@ -32,11 +35,15 @@ The main technical question is not only whether deep learning can pick first bre
 ## 1. Project Summary
 
 
-This repository implements an end-to-end machine learning pipeline for automated seismic first break picking on the four public HardPicks hard-rock mining surveys: Brunswick, Halfmile, Lalor, and Sudbury. The project starts from HDF5 seismic archives, verifies and audits them, transforms each survey into harmonized shot-gather tensors and trace-level samples, trains multiple model families, and benchmarks the trained models with common physical metrics and inference-latency measurements.
+This repository is about teaching computers to find the **first moment a seismic signal arrives** in underground exploration data. In simple language, imagine sending a sound pulse into the ground and recording how that vibration reaches many sensors placed across the surface. Each sensor produces a waveform over time. The project asks: can a model look at those waveforms and mark the first meaningful arrival automatically, instead of requiring a human to click through millions of traces by hand?
 
-The central learning problem is: given seismic waveforms and expert-labeled first break times, predict the first arrival time for unseen traces. In this project, the strongest models are gather-level 2D models with a Soft-Argmax regression head, especially a pretrained ResNet-UNet variant that achieved the best internal test performance.
+The reason this matters is practical. First-break picks are used early in seismic processing to estimate near-surface effects, apply static corrections, and improve the quality of deeper subsurface imaging. In mining and hard-rock exploration, that downstream imaging is important because companies are trying to understand what lies far below the surface without relying only on expensive drilling.
 
-The pipeline is modular. Data verification and preprocessing live in `src/data/`, handcrafted features in `src/features/`, neural architectures in `src/models/`, and training infrastructure in `src/training/`. The notebooks orchestrate the workflow from environment setup to EDA, preprocessing, training, and model comparison.
+Technically, this repository builds a full pipeline around that problem. It starts from raw HDF5 survey files, verifies that the metadata and labels are sane, performs exploratory data analysis to understand how the four surveys differ, standardizes them into a common machine-learning format, trains several families of models, and then compares their accuracy and speed. The current strongest model in the repository is a gather-level 2D pretrained ResNet-UNet with a Soft-Argmax regression head.
+
+The project is also about comparing **representations**, not just models. Some models see one seismic trace at a time. Others see a 2D shot gather, where many neighboring traces are placed side by side so that the first-break curve becomes visible as a coherent spatial pattern. One of the main conclusions of the repository is that this choice of representation matters enormously: the 2D gather-based models are much better than the 1D trace-only models on the current repository split.
+
+The code is organized as a reusable research pipeline. Data verification and preprocessing live in `src/data/`, handcrafted feature extraction in `src/features/`, neural architectures in `src/models/`, and optimization/evaluation logic in `src/training/` and `src/evaluation/`. The notebooks orchestrate the workflow from environment setup through EDA, preprocessing, training, and benchmarking.
 
 ---
 
@@ -133,19 +140,29 @@ That heterogeneity is exactly why EDA had to drive the engineering decisions.
 - Multiple neural models have already been trained and benchmarked on the repository's internal split.
 - Leaderboard CSVs and training curves already exist under `artifacts/plots/`.
 
-### Important evaluation note
+### Important evaluation note, explained simply
 
-These datasets come from the HardPicks benchmark, but the **current repository results are not the official leave-one-survey-out HardPicks benchmark**.
+The **data itself is official**. The repository is using the real public HardPicks datasets.
 
-What this repository currently evaluates:
-- A deterministic **per-asset stratified 70/15/15 train/val/test split** stored in `data/processed/split_index.csv`.
-- A **combined multi-asset training regime** with balanced asset sampling.
-- Final metrics reported on the internal `test` split built from all four assets.
+The thing that is **not official yet is the train/test setup used for the current reported results**.
 
-What this repository does **not** yet report in the current README:
-- The official HardPicks leave-one-survey-out cross-survey benchmark used in the St-Charles et al. evaluation protocol.
+Right now, this repository does the following:
+- it takes each of the four datasets separately,
+- splits each one into `70% train / 15% validation / 15% test`,
+- then trains models on the combined training portions of all four datasets,
+- and finally reports results on the combined internal test portions of all four datasets.
 
-That distinction matters scientifically. The current results are useful for comparing architectures **inside this repository**, but they should not be presented as direct cross-survey benchmark replacements.
+In very simple language, the current results answer this question:
+- **If I hide part of each dataset, train on the rest, and test on the hidden part, which model works best?**
+
+The published HardPicks benchmark asks a harder and different question:
+- **If I completely hold out one whole survey, train on the other surveys, and then test on the unseen survey, how well does the model generalize to a new site?**
+
+So the problem is **not** that the repository trained on the wrong data.
+The problem is **not** that the repository used unofficial files.
+The real issue is only that the current evaluation split is easier and different from the official published benchmark protocol.
+
+That is why the current leaderboard is still useful for comparing models inside this repository, but it should not yet be described as a direct replacement for the published cross-survey HardPicks benchmark results.
 
 ---
 
@@ -1018,6 +1035,7 @@ Allen, R. V. (1978). Automatic earthquake recognition and timing from single tra
 Allen, R. V. (1982). Automatic phase pickers: Their present use and future prospects. *Bulletin of the Seismological Society of America*, 72(6B), S225-S242.
 
 Sabbione, J. I., & Velis, D. (2010). Automatic first-breaks picking: New strategies and algorithms. *Geophysics*, 75(4), V67-V76.
+
 
 
 
