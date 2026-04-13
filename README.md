@@ -1,19 +1,15 @@
 # Automated Seismic First Break Picking
 ## A Deep Learning Pipeline for Hard-Rock Seismic Exploration
 
-Saved sanity plot: /content/drive/MyDrive/seismic-first-break-picking/results/sanity_plots/00_first_traces.png
-This figure is produced by the very first verification notebook and is the first visual sanity check in the project. It shows representative raw traces from Brunswick, Halfmile, Lalor, and Sudbury before preprocessing, so the reader can immediately see that the surveys do not have the same amplitude character, noise floor, or waveform shape. Repo-relative path: `results/sanity_plots/00_first_traces.png`.
+This repository develops and benchmarks machine learning methods for automated seismic first-break picking on the four public HardPicks hard-rock surveys: Brunswick, Halfmile, Lalor, and Sudbury. The project covers the full workflow from raw HDF5 verification and exploratory data analysis through harmonized preprocessing, multi-model training, and comparative evaluation.
 
-![Raw trace sanity plot](results/sanity_plots/00_first_traces.png)
+The main technical question is not only whether deep learning can pick first breaks accurately, but which representation and architecture work best under real survey heterogeneity. In the current repository results, gather-level 2D models clearly outperform trace-level 1D models, and a pretrained ResNet-UNet with a Soft-Argmax regression head is the strongest model on the internal test split.
 
 ---
 
 ## Table of Contents
 
-1. [Project Summary](#1-project-summary)
-2. [Current Status and Scope](#2-current-status-and-scope)
-3. [The Scientific Problem](#3-the-scientific-problem)
-4. [The HardPicks Datasets](#4-the-hardpicks-datasets)
+1. [Project Summary](#1-project-summary)`r`n2. [The Scientific Problem](#2-the-scientific-problem)`r`n3. [The HardPicks Datasets](#3-the-hardpicks-datasets)`r`n4. [Current Status and Scope](#4-current-status-and-scope)
 5. [How 3D Surveys Become 2D Images and 1D Traces](#5-how-3d-surveys-become-2d-images-and-1d-traces)
 6. [Data Fields Used by the Pipeline](#6-data-fields-used-by-the-pipeline)
 7. [EDA Notebook-by-Notebook Findings](#7-eda-notebook-by-notebook-findings)
@@ -35,6 +31,7 @@ This figure is produced by the very first verification notebook and is the first
 
 ## 1. Project Summary
 
+
 This repository implements an end-to-end machine learning pipeline for automated seismic first break picking on the four public HardPicks hard-rock mining surveys: Brunswick, Halfmile, Lalor, and Sudbury. The project starts from HDF5 seismic archives, verifies and audits them, transforms each survey into harmonized shot-gather tensors and trace-level samples, trains multiple model families, and benchmarks the trained models with common physical metrics and inference-latency measurements.
 
 The central learning problem is: given seismic waveforms and expert-labeled first break times, predict the first arrival time for unseen traces. In this project, the strongest models are gather-level 2D models with a Soft-Argmax regression head, especially a pretrained ResNet-UNet variant that achieved the best internal test performance.
@@ -43,33 +40,8 @@ The pipeline is modular. Data verification and preprocessing live in `src/data/`
 
 ---
 
-## 2. Current Status and Scope
+## 2. The Scientific Problem
 
-### What is already implemented and evidenced in the repository
-
-- Raw data verification and sanity plotting are complete.
-- Per-asset and cross-asset EDA are complete.
-- The preprocessing pipeline has already produced processed gathers, split indices, and a preprocessing report.
-- Multiple neural models have already been trained and benchmarked on the repository's internal split.
-- Leaderboard CSVs and training curves already exist under `artifacts/plots/`.
-
-### Important evaluation note
-
-These datasets come from the HardPicks benchmark, but the **current repository results are not the official leave-one-survey-out HardPicks benchmark**.
-
-What this repository currently evaluates:
-- A deterministic **per-asset stratified 70/15/15 train/val/test split** stored in `data/processed/split_index.csv`.
-- A **combined multi-asset training regime** with balanced asset sampling.
-- Final metrics reported on the internal `test` split built from all four assets.
-
-What this repository does **not** yet report in the current README:
-- The official HardPicks leave-one-survey-out cross-survey benchmark used in the St-Charles et al. evaluation protocol.
-
-That distinction matters scientifically. The current results are useful for comparing architectures **inside this repository**, but they should not be presented as direct cross-survey benchmark replacements.
-
----
-
-## 3. The Scientific Problem
 
 A seismic trace records ground motion as a function of time after an active source event. The **first break** is the earliest time at which seismic energy clearly arrives at a receiver. Before the first break, the trace is dominated by ambient or acquisition noise. After the first break, the signal becomes physically meaningful for downstream processing.
 
@@ -86,7 +58,8 @@ The target is a continuous physical quantity measured in milliseconds, so the pr
 
 ---
 
-## 4. The HardPicks Datasets
+## 3. The HardPicks Datasets
+
 
 The project uses four real hard-rock seismic surveys from the public HardPicks collection.
 
@@ -146,6 +119,33 @@ The four surveys are heterogeneous in:
 - apparent label quality.
 
 That heterogeneity is exactly why EDA had to drive the engineering decisions.
+
+---
+
+## 4. Current Status and Scope
+
+
+### What is already implemented and evidenced in the repository
+
+- Raw data verification and sanity plotting are complete.
+- Per-asset and cross-asset EDA are complete.
+- The preprocessing pipeline has already produced processed gathers, split indices, and a preprocessing report.
+- Multiple neural models have already been trained and benchmarked on the repository's internal split.
+- Leaderboard CSVs and training curves already exist under `artifacts/plots/`.
+
+### Important evaluation note
+
+These datasets come from the HardPicks benchmark, but the **current repository results are not the official leave-one-survey-out HardPicks benchmark**.
+
+What this repository currently evaluates:
+- A deterministic **per-asset stratified 70/15/15 train/val/test split** stored in `data/processed/split_index.csv`.
+- A **combined multi-asset training regime** with balanced asset sampling.
+- Final metrics reported on the internal `test` split built from all four assets.
+
+What this repository does **not** yet report in the current README:
+- The official HardPicks leave-one-survey-out cross-survey benchmark used in the St-Charles et al. evaluation protocol.
+
+That distinction matters scientifically. The current results are useful for comparing architectures **inside this repository**, but they should not be presented as direct cross-survey benchmark replacements.
 
 ---
 
@@ -221,6 +221,12 @@ The repository contains five main EDA notebooks:
 
 A supplementary notebook, `notebooks/01_eda_supplementary.ipynb`, refined several early assumptions and is also important to the final pipeline.
 
+The very first visual sanity check in the project actually comes from the environment-and-verification notebook. It produces the plot below, saved at `/content/drive/MyDrive/seismic-first-break-picking/results/sanity_plots/00_first_traces.png`, which shows representative raw traces from Brunswick, Halfmile, Lalor, and Sudbury before preprocessing.
+
+This figure is not included just for decoration. It demonstrates the core reason the rest of the pipeline had to be data-driven: the four assets do not share one common waveform appearance. Even before gather construction, you can already see that the surveys differ in amplitude scale, noise floor, and visible onset character. That visual evidence supports later design choices such as per-trace normalization, harmonization, and multi-asset-aware training.
+
+![Raw trace sanity plot](results/sanity_plots/00_first_traces.png)
+
 ### 7.1 Brunswick notebook
 
 Key findings from `results/eda/brunswick_eda_report.json`:
@@ -234,6 +240,10 @@ Why it mattered:
 - Brunswick is the main reason the pipeline needs memory-aware batching and width divisibility.
 - Its very late arrivals are why the project kept the full 1500 ms common window instead of trying an aggressive crop.
 - Because Brunswick dominates raw trace count, training needed balancing to avoid a Brunswick-biased model.
+
+![Brunswick gather-size distribution](results/eda_plots/brunswick/brunswick_gather_sizes.png)
+
+This Brunswick gather-size plot is one of the clearest pieces of evidence behind the batching strategy. It shows that Brunswick gathers are not just larger than the others on average, but consistently large enough to dominate memory planning, which is why width-aware collation and divisibility constraints became first-class engineering requirements.
 
 ### 7.2 Halfmile notebook
 
@@ -264,6 +274,10 @@ Why it mattered:
 - The strong amplitude heterogeneity reinforced the need for robust normalization.
 - The higher mispick fraction supported masking suspect labels rather than trusting every annotation equally.
 
+![Lalor SNR distribution](results/eda_plots/lalor/lalor_snr_dist.png)
+
+This Lalor SNR plot helps explain an otherwise easy misunderstanding of the dataset. Lalor is not difficult because the signal is uniformly weak; in fact, its signal quality is often strong, so the real challenge is that its labels are only partial and its temporal resolution differs from the rest of the benchmark, which is exactly why harmonization mattered so much.
+
 ### 7.4 Sudbury notebook
 
 Key findings from `results/eda/sudbury_eda_report.json`:
@@ -278,6 +292,10 @@ Why it mattered:
 - Sudbury is why the pipeline keeps unlabeled traces in 2D inputs but excludes them from loss and metric computation.
 - Its longer recording window motivated common-window cropping to 1500 ms.
 - The coordinate issue is why the pipeline prefers precomputed offset fields over naive coordinate-derived offsets where possible.
+
+![Sudbury first-break versus offset](results/eda_plots/sudbury/sudbury_fb_vs_offset.png)
+
+This Sudbury first-break-versus-offset visualization shows why the asset needed special handling. The arrival pattern is earlier overall than Brunswick and Halfmile, but the labels are much sparser and the structure is noisier, which supports the decision to preserve real Sudbury traces as gather context while masking unlabeled positions from supervision.
 
 ### 7.5 Combined notebook
 
@@ -294,9 +312,17 @@ Why it mattered:
 - It justified building both 1D and 2D pipelines rather than only one framing.
 - It made clear that evaluation claims must be separated into internal-split and future cross-survey benchmark claims.
 
+The next three figures summarize the cross-asset findings that most directly affected the final pipeline.
+
+The first figure compares first-break statistics across assets. It supports the claim that the project is not dealing with a single homogeneous timing distribution: Brunswick tends to have much later arrivals, while Sudbury is earlier and much sparser in labels. That is why stratification and balanced sampling were necessary.
+
 ![Combined first-break statistics](results/eda_plots/combined/combined_fb_stats.png)
 
+The second figure compares gather-size distributions. This is the visual justification for variable-width batching: Brunswick, Lalor, Halfmile, and Sudbury do not occupy one neat common width, so a single global padding target would waste memory and compute.
+
 ![Combined gather-size comparison](results/eda_plots/combined/combined_gather_sizes.png)
+
+The third figure comes from the supplementary EDA and compares Lalor resampling methods. Its role in the README is specific: it demonstrates that downsampling Lalor from 1 ms to 2 ms can preserve the first-break neighborhood well enough to support a harmonized training format, which is why `resample_poly` was chosen.
 
 ![Lalor resampling comparison](results/eda_plots/supplementary/sec5_resampling_comparison.png)
 
@@ -670,14 +696,30 @@ They are excellent for comparing models in this repository, but they are **not**
 - UNet-2D training curve: `results/benchmark/unet_2d_training_curve.png`
 - Leaderboard comparison: `results/benchmark/val_vs_test_leaderboard.png`
 - Accuracy-latency Pareto plot: `results/benchmark/deployment_pareto.png`
+- ResNet-UNet test scatter: `results/benchmark/resnet_unet_test_scatter.png`
+- UNet-2D test error histogram: `results/benchmark/unet_2d_test_error_hist.png`
+
+The winner's training curve is included here because it supports the main optimization claim made later in the analysis section: the pretrained gather-level model improves rapidly, then settles into a comparatively stable validation regime rather than oscillating wildly.
 
 ![ResNet-UNet training curve](results/benchmark/resnet_unet_training_curve.png)
 
+The UNet-2D curve is shown directly beside it because the contrast matters. This model still benefits from the correct 2D framing, but the figure shows a much noisier and less data-efficient optimization path than the pretrained ResNet-UNet.
+
 ![UNet-2D training curve](results/benchmark/unet_2d_training_curve.png)
+
+The leaderboard plot demonstrates the central empirical claim of the README: gather-level 2D models separate decisively from the 1D family, and the pretrained ResNet-UNet opens a second major gap over the custom UNet-2D.
 
 ![Validation vs test leaderboard](results/benchmark/val_vs_test_leaderboard.png)
 
+The Pareto plot is included because speed is part of the project argument, not an afterthought. It shows that the most accurate model is also near the efficient frontier instead of being an impractically slow outlier.
+
 ![Accuracy-latency Pareto frontier](results/benchmark/deployment_pareto.png)
+
+The two figures below give complementary views of prediction quality. The ResNet-UNet scatter plot shows how tightly the winning model tracks the ideal diagonal, while the UNet-2D error histogram makes the heavier error tail of the runner-up easier to see.
+
+![ResNet-UNet test scatter](results/benchmark/resnet_unet_test_scatter.png)
+
+![UNet-2D test error histogram](results/benchmark/unet_2d_test_error_hist.png)
 
 ---
 
@@ -856,11 +898,11 @@ Because the current repository table uses an internal split rather than leave-on
 7. `results/benchmark/unet_2d_training_curve.png`
    - Useful side-by-side with the winner to show what weaker optimization looks like.
 
-8. `artifacts/plots/ResNet_UNet/test_scatter.png`
-   - Good for showing calibration and spread of the winning model.
+8. `results/benchmark/resnet_unet_test_scatter.png`
+   - Useful when discussing how tightly the winner tracks the ideal prediction line.
 
-9. `artifacts/plots/UNet_2D/test_error_hist.png`
-   - Good for showing long-tail error behavior in a weaker but still gather-aware model.
+9. `results/benchmark/unet_2d_test_error_hist.png`
+   - Useful when discussing why the runner-up still has a much heavier error tail than the winner.
 
 ### Additional plot ideas worth adding later
 
@@ -976,4 +1018,8 @@ Allen, R. V. (1978). Automatic earthquake recognition and timing from single tra
 Allen, R. V. (1982). Automatic phase pickers: Their present use and future prospects. *Bulletin of the Seismological Society of America*, 72(6B), S225-S242.
 
 Sabbione, J. I., & Velis, D. (2010). Automatic first-breaks picking: New strategies and algorithms. *Geophysics*, 75(4), V67-V76.
+
+
+
+
 
