@@ -37,11 +37,11 @@ This repository documents an end-to-end machine learning workflow built on the f
 
 This project is about automating one of the oldest and most repetitive tasks in reflection seismology: deciding, trace by trace, when the very first useful seismic energy reaches each receiver after a source is fired. A human interpreter can do this by visually scanning waveforms and clicking the onset, but modern hard-rock surveys contain millions of traces. That makes manual picking slow, expensive, and inconsistent, especially on noisy or weak traces.
 
-For a reader far from geology, it helps to imagine the survey as follows. A source at the surface sends energy into the ground. Hundreds or thousands of receivers record how the vibration returns through time. Each receiver produces a one-dimensional waveform called a seismic trace. The model's job is to inspect that waveform and predict one number: the first-break time in milliseconds. That predicted time is later used by downstream geophysical processing, which means the model is not merely classifying whether a signal exists; it is estimating a physically meaningful arrival time.
+For a reader far from geology, it helps to imagine the survey as follows. A source at the surface sends energy into the ground. Hundreds or thousands of receivers record how the vibration returns through time. Each receiver produces a one-dimensional waveform called a seismic trace. The model's job is to inspect that waveform and predict one number: the first-break time in milliseconds. The target is not an ordered set of classes such as `early` or `late`; it is a continuous floating-point value on a physical time axis. That predicted time is later used by downstream geophysical processing, which means the model is not merely classifying whether a signal exists; it is estimating a physically meaningful arrival time.
 
-The difficult part is not detecting a clean arrival in isolation. Simple threshold or STA/LTA-style logic can often do that on an easy trace. The real challenge is robust prediction across surveys that differ in noise floor, acquisition hardware, sample rate, trace length, label density, coordinate scaling, and waveform character. The repository therefore treats the task as a data-engineering problem and a model-design problem at the same time. It does not assume the four surveys are already comparable; it verifies that claim from the raw files upward.
+The difficult part is not detecting a clean arrival in isolation. Simple threshold or STA/LTA-style logic can often do that on an easy trace. The real challenge is robust prediction across surveys that differ in noise floor, acquisition hardware, sample rate, trace length, label density, coordinate scaling, and waveform character. The repository therefore treats the task as a harmonization problem as much as a modeling problem. The four surveys are structurally incompatible by default: Lalor lives on a 1 ms grid, Sudbury has a longer raw window, coordinate scaling behaves differently across assets, and label density ranges from dense to extremely sparse. The repository does not assume these surveys are already comparable; it verifies and engineers that comparability from the raw files upward.
 
-The project is also unusual because it sits at the crossroads of two ML worlds that are usually treated separately. On one side, the ordered shot gather is naturally a two-dimensional image: time runs vertically, traces run horizontally, and the first-break curve becomes a visible spatial pattern that convolutional models can exploit. On the other side, the strongest geometric prior in first-break picking is source-receiver offset, which is a scalar derived from metadata coordinates and therefore belongs to the tabular side of the problem. A model that sees only the image can miss explicit geometry. A model that sees only tabular summaries can miss the local waveform and neighboring-trace context. This duality is central to the project.
+The project is also unusual because it sits at the crossroads of two ML worlds that are usually treated separately. On one side, the ordered shot gather is naturally a two-dimensional image: time runs vertically, traces run horizontally, and the first-break curve becomes a visible spatial pattern that convolutional models can exploit. On the other side, the strongest geometric prior in first-break picking is source-receiver offset, which is a scalar derived from metadata coordinates and therefore belongs to the tabular side of the problem. A model that sees only the image can miss explicit geometry. A model that sees only tabular summaries can miss the local waveform and neighboring-trace context. This duality is central to the project. One of the clearest findings later in the README is that the current 1D neural models give up offset entirely and therefore operate only on the waveform side of the problem, which turns out to be a major limitation in the benchmark results.
 
 The repository therefore compares not only architectures but representations. It builds both a 2D gather pipeline and a 1D trace pipeline, standardizes all four surveys to a common temporal format, masks invalid or missing labels instead of fabricating them, trains multiple neural families, and benchmarks them under one controlled internal split. The goal is to understand which inductive biases survive real survey heterogeneity, what preprocessing decisions were actually necessary, and what parts of the workflow remain unfinished before claiming alignment with the official HardPicks cross-survey benchmark.
 
@@ -55,7 +55,7 @@ The first break is the earliest arrival of seismic energy on a trace. Before tha
 
 Accurate first-break picks matter because they feed multiple downstream steps:
 
-- **Static corrections.** Near-surface material is highly variable, so waves accumulate extra time delays before they reach the deeper structure the survey actually wants to image. First-break picks help estimate and remove that shallow delay, preventing deep reflectors from appearing smeared or shifted.
+- **Static corrections.** Near-surface material is highly variable, so waves accumulate extra time delays before they reach the deeper structure the survey actually wants to image. Those delays are called `static` because, for a given source or receiver position, they behave like location-dependent time shifts caused by shallow geology rather than by the moving wavefield itself. First-break picks are the measurements used to estimate and remove those shifts, preventing deep reflectors from appearing smeared or shifted.
 - **Near-surface velocity estimation and refraction analysis.** First-arrival times across different offsets encode how quickly waves travel through shallow layers. That helps estimate velocity structure near the surface.
 - **Muting and processing decisions.** Many seismic processing steps need to know where the usable signal begins so that earlier noise can be suppressed and later processing can focus on meaningful energy.
 - **Imaging deep ore targets.** In hard-rock mining surveys, the practical end goal is often better structural imaging of deep mineralized zones. First-break errors propagate into that imaging chain.
@@ -79,17 +79,19 @@ The output of this task is a continuous time measured in milliseconds. That make
 
 It is **not categorical classification**, because there are no discrete classes such as `early`, `medium`, or `late` arrivals. It is **not ordinal classification**, because the target is not a small ordered set of bins. The label is a continuous physical quantity on a time axis.
 
-At first glance one might expect a segmentation formulation, especially when the shot gather is rendered as an image. A segmentation network could try to separate the region before and after the first break. This repository ultimately rejects that framing for the final benchmarked models. Under per-trace normalization, weak traces can have their pre-arrival noise visually amplified, which makes the idea of a clean binary region boundary much less stable. More importantly, the scientific target is one time value per trace, not a filled region. That is why the final models use regression heads and, for the U-Net family, Soft-Argmax time expectation rather than hard segmentation masks.
+At first glance one might expect a segmentation formulation, especially when the shot gather is rendered as an image. A segmentation network could try to separate the region before and after the first break. This repository ultimately rejects that framing for the final benchmarked models. Under per-trace normalization, weak traces can have their pre-arrival noise visually amplified, which makes the idea of a clean binary region boundary much less stable. More importantly, the scientific target is one time value per trace, not a filled region. That is why the final models use regression heads and, for the U-Net family, Soft-Argmax time expectation rather than hard segmentation masks. The preprocessing section later explains why per-trace normalization is the practical choice for this multi-asset problem and why that choice makes hard segmentation less stable than regression.
 
 ---
 
 ## 3. The HardPicks Datasets
 
-The repository uses the four public hard-rock seismic surveys distributed through the HardPicks benchmark introduced by St-Charles et al. The benchmark is one of the few openly available multi-survey datasets for first-break picking in hard-rock exploration, and it has become a common reference point for later deep-learning papers in this niche.
+The repository uses the four public hard-rock seismic surveys distributed through the HardPicks benchmark introduced by St-Charles et al. The benchmark is one of the few openly available multi-survey datasets for first-break picking in hard-rock exploration, and later papers such as DSU-Net and DGL-FB explicitly position themselves against it. As of April 16, 2026, OpenAlex lists `8` citations for the journal benchmark paper, which is enough to make it the de facto reference point in this narrow literature rather than an isolated dataset release.
 
 ### Public benchmark context
 
-| Survey | Region | Public context | Public license |
+The license summary below is taken from the official `mila-iqia/hardpicks` GitHub repository.
+
+| Survey | Region | Public context | License in official HardPicks repo |
 | :--- | :--- | :--- | :--- |
 | Brunswick | New Brunswick, Canada | Hard-rock 3D reflection survey used in the HardPicks benchmark | CC BY 4.0 |
 | Halfmile | New Brunswick, Canada | Hard-rock 3D reflection survey from the same broader mining province but a distinct acquisition | CC BY 4.0 |
@@ -103,7 +105,7 @@ The public HardPicks repository also defines a leave-one-survey-out evaluation p
 - `Fold Halfmile`: train on Lalor and Brunswick, validate on Sudbury, test on Halfmile.
 - `Fold Lalor`: train on Brunswick and Sudbury, validate on Halfmile, test on Lalor.
 
-That protocol matters later when interpreting this repository's results, because this repository currently benchmarks on a different internal split even though it uses the same public data files.
+That protocol matters later when interpreting this repository's results. It is harder than a standard random split because the test survey is an entirely unseen acquisition with its own noise characteristics, timing, and geometry, so the model is being asked to generalize out of distribution rather than merely to unseen shots from familiar surveys.
 
 ### Why no cross-dataset deduplication was necessary
 
@@ -113,8 +115,8 @@ The four datasets come from different mining regions, different acquisition camp
 
 Even before running EDA, the public context already suggests that combining the surveys will not be trivial:
 
-- Brunswick and Halfmile come from one mining province, but they are still separate surveys with distinct geometry and acquisition specifics.
-- Lalor is explicitly described in the literature as a MEMS-based survey. That matters because sensor type changes the spectral character of the recorded waveform and helps explain why Lalor looks different from the others in raw-trace sanity plots.
+- Brunswick and Halfmile both come from the Bathurst Mining Camp in New Brunswick and both target volcanogenic massive sulfide settings, yet they are still separate acquisitions with distinct geometry and timing. That makes their differences more, not less, instructive: even closely related surveys are not plug-and-play.
+- Lalor is explicitly described in the literature as a MEMS-accelerometer survey rather than a conventional geophone survey. MEMS receivers measure ground acceleration, which shifts recorded energy toward higher frequencies and helps explain Lalor's sharper waveform texture and why its native 1 ms sampling contains meaningful detail.
 - Sudbury comes from a different mining camp and acquisition history, so one should expect differences in geometry, timing, and labeling style rather than assume interchangeability.
 
 This is why the repository treats cross-asset harmonization as something to prove and engineer, not something to assume.
@@ -150,7 +152,7 @@ When the traces are sorted by offset, the first-break picks usually form a smoot
 
 ![Example shot gather with ground-truth first-break curve](results/eda_plots/brunswick/brunswick_vizex_easy_shot760.png)
 
-The figure above is a good visual definition of the target itself. The red curve is not a segmentation region or a classification label; it is a single continuous time value for every column. This is why the final output layer in the main models predicts a time distribution over the vertical axis and then converts it into one continuous millisecond prediction per trace.
+The repository currently embeds shot `760` because that rendered example is tracked under `results/eda_plots`; the earlier implementation notes also highlighted shot `1116` as another easy Brunswick gather. The figure above is a good visual definition of the target itself. The red curve is not a segmentation region or a classification label; it is a single continuous time value for every column. This is why the final output layer in the main models predicts a time distribution over the vertical axis and then converts it into one continuous millisecond prediction per trace.
 
 ### Why this task sits between computer vision and tabular data
 
@@ -167,13 +169,13 @@ In the current repository, the 2D models exploit offset implicitly through the o
 
 The trace-level pipeline uses `trace_collate_fn` in `src/data/dataset.py` to extract only valid labeled traces from processed gathers and batch them as tensors of shape `[P, 1, 751]`.
 
-That framing is computationally simple, but it gives up two things at once:
+That framing is computationally simple, but it gives up three things at once:
 
 - neighboring-trace context,
-- the visible moveout curve that disambiguates weak arrivals.
+- the visible moveout curve that disambiguates weak arrivals,
+- explicit offset information, because the current 1D neural inputs are waveform-only.
 
 This is the central representation tradeoff that the benchmark later tests.
-
 ---
 
 ## 5. Related Work and Benchmark Context
@@ -184,17 +186,17 @@ This project is not built in a vacuum. The repository is best understood as one 
 
 | Work | Data / benchmark scope | Representation and preprocessing direction | Metrics and reported lesson | Why it matters here |
 | :--- | :--- | :--- | :--- | :--- |
-| **St-Charles et al. (2021, 2024)** | Introduced the HardPicks multi-survey benchmark on Brunswick, Halfmile, Lalor, and Sudbury | Gather-based deep models on a public multi-survey benchmark with survey-level folds | Reports benchmark errors and hit-rate style metrics under leave-one-survey-out evaluation | Supplies the data, the official benchmark protocol, and the baseline comparison target |
-| **Zwartjes and Yoo (2022)** | First-break picking outside the exact HardPicks setup | Compares deep architectures for the picking task | Shows that architecture choice materially changes performance | Supports the decision to compare several model families rather than assume one network is enough |
-| **Mardan et al. (2024)** | Transfer-learning workflow for automatic first-break picking with limited labeling | Fine-tuning a pretrained deep model on small labeled subsets from one survey | Emphasizes that transfer learning is useful when labels are scarce | Makes the pretrained ResNet-UNet a scientifically motivated choice rather than an arbitrary one |
-| **DSU-Net (2024)** | HardPicks-style 2D first-break picking | Extends U-Net segmentation with dynamic snake convolutions to favor horizontal continuity and jumps | Shows that better 2D spatial modeling improves picking | Reinforces the idea that gather-level continuity is a core signal source |
-| **DGL-FB (2024)** | HardPicks-style benchmark setting with graph learning | Moves beyond plain image grids by encoding higher-dimensional source-receiver relations | Argues that more explicit geometry improves robustness | Points toward a future direction beyond standard CNN gathers |
+| **St-Charles et al. (2021, 2024)** | HardPicks four-survey benchmark with survey-held-out evaluation; three sites supply training while one unseen site supplies the hardest test | 2D line-gather U-Net baseline with seismic amplitude plus distance-prior channels, random crops to fixed windows, and receiver-axis perturbations | The workshop baseline reports HR@1px / MAE on the held-out test sites of `87.6% / 4.5 samples` for Brunswick, `83.8% / 3.8` for Halfmile, `73.1% / 2.8` for Sudbury, and `76.3% / 124` for Lalor. The key lesson is that fold difficulty varies sharply by site. | Supplies the data, the official split logic, and the baseline numbers that later papers try to beat. |
+| **Zwartjes and Yoo (2022)** | First-break picking outside the exact HardPicks setup | Compares multiple deep architectures for the same picking task | Shows that architecture choice alone can move performance materially even before changing the data regime | Supports the decision to compare several model families rather than assume one network is enough |
+| **Mardan et al. (2024)** | Transfer-learning workflow on two real mining datasets, with fine-tuning on manually picked subsets of fewer than `10%` of shots per survey | Pretrained residual U-Net fine-tuned on small, manually selected survey-specific subsets rather than trained jointly across all assets | Shows that pretraining and limited-shot fine-tuning are effective when labels are scarce, and that random initialization can overfit even with longer training | Makes the pretrained ResNet-UNet scientifically motivated and highlights how different this repository's simultaneous multi-asset training setup is |
+| **DSU-Net (2024)** | HardPicks-style 2D first-break picking | Segmentation-style U-Net with dynamic snake convolutions designed to preserve horizontal continuity and catch abrupt first-break jumps | Reports state-of-the-art field-survey performance over plain U-Net-style baselines, reinforcing that 2D continuity modeling matters even when abrupt jumps must be preserved | Helps position this repository's 2D winner inside the same continuity-aware gather-model family, even though the output head here is regression rather than segmentation |
+| **DGL-FB (2024)** | Single field-dataset graph-learning experiment rather than simultaneous four-survey HardPicks training | Applies linear moveout correction, crops to short windows around `128` samples, normalizes traces by their absolute maximum, then builds a graph over traces and feeds a graph encoder into a ResUNet-style 1D segmentation head | Reports `81.8%` picking accuracy versus `76.3%` for its 2D benchmark and `RMSE = 3.24` versus `460.0`, showing that broader geometric relations can stabilize difficult picks dramatically in that setting | Points toward a future direction beyond the current shot-gather CNN pipeline and clarifies that reproducing graph methods here would require restructuring the input pipeline rather than only swapping model classes |
 
 ### How this repository is similar to the literature
 
 The repository agrees with several broad literature trends:
 
-- gather-level context is more informative than treating each trace independently,
+- gather-level spatial coherence is more informative than treating each trace independently,
 - transfer learning is a reasonable idea for seismic picking even though the source domain is natural images,
 - geometry matters enough that purely local single-trace modeling is unlikely to be sufficient,
 - benchmark claims must be tied carefully to the actual evaluation protocol.
@@ -203,9 +205,9 @@ The repository agrees with several broad literature trends:
 
 The repository also makes several deliberate choices of its own:
 
-- It preserves post-harmonization gather width and uses **dynamic batch padding** instead of reshaping every gather to one fixed global width.
-- It treats the target as **regression in milliseconds** and uses **Soft-Argmax** time expectation rather than a hard segmentation mask as the final prediction mechanism.
-- It harmonizes all four surveys to a common temporal grid of **751 samples at 2 ms** while trying to preserve the native moveout pattern rather than removing it through heavier geometry-specific transforms.
+- Unlike the St-Charles baseline, it preserves post-harmonization gather width and uses **dynamic batch padding** instead of reshaping every gather to one fixed global width.
+- Unlike segmentation-centered models such as **DSU-Net**, it treats the target as **regression in milliseconds** and uses **Soft-Argmax** time expectation rather than a hard segmentation mask as the final prediction mechanism.
+- Unlike more geometry-heavy directions such as **DGL-FB**, it keeps the moveout curve visible inside the ordered gather instead of flattening it with linear moveout correction or cropping to a short post-transform window before learning.
 - It benchmarks under a **deterministic internal per-asset split**, not yet under the official leave-one-survey-out HardPicks folds.
 
 ### What should and should not be compared directly
@@ -229,10 +231,10 @@ The repository does not treat the HDF5 headers as incidental metadata. Several o
 | :--- | :--- | :--- |
 | `data_array` | The raw seismic waveform: a time-indexed measurement of ground motion for one receiver during one shot event | This is the actual signal the models learn from. Every column in the 2D gather image comes from one row of this array. |
 | `SHOTID` | The identifier of the source event that generated the trace | This is the main grouping key. Without `SHOTID`, the pipeline cannot know which traces belong in the same gather. |
-| `SHOT_PEG` | An alternate shot identifier found in some assets | Useful for auditing and cross-checking survey structure, but `SHOTID` is the canonical grouping key in the implemented pipeline. |
-| `SOURCE_X`, `SOURCE_Y`, `SOURCE_HT` | The source location and elevation | Combined with receiver coordinates, these allow source-receiver geometry to be reconstructed and offsets to be computed if needed. |
-| `REC_X`, `REC_Y`, `REC_HT` | The receiver location and elevation | These define where each trace was recorded. They are essential for offset calculations and for sanity-checking the acquisition geometry. |
-| `REC_PEG` | Receiver identifier | Useful for acquisition bookkeeping and audit-style checks, though not the primary modeling feature itself. |
+| `SHOT_PEG` | A field-survey peg identifier: an acquisition bookkeeping label tied to a shot location along the survey layout, older than GPS-style coordinate workflows | Useful only for audit-style cross-checks. The current pipeline does **not** use it to build gathers, because `SHOTID` is the canonical grouping key. |
+| `SOURCE_X`, `SOURCE_Y`, `SOURCE_HT` | The source position in plan view and elevation. `X` and `Y` locate the shot on the ground; height records its elevation. | `X` and `Y` are what matter for horizontal offset and gather ordering. Source elevation is useful for geometry sanity checks and thinking about statics, but it is not a primary model input in the current benchmark. |
+| `REC_X`, `REC_Y`, `REC_HT` | The receiver position in plan view and elevation. `X` and `Y` locate where the trace was recorded; receiver height describes local topography. | Receiver `X` and `Y` are used for offset calculations and gather ordering. Receiver height is useful for geometry sanity checks and static-correction reasoning, but horizontal offset in the current pipeline comes from `X` and `Y` rather than from elevation. |
+| `REC_PEG` | A field-survey receiver peg identifier: a line-and-station style bookkeeping label used by acquisition crews to index receiver positions | Kept only for audit or cross-reference purposes. The current benchmark does **not** feed it directly into the models and relies on coordinates plus `SHOTID` instead. |
 | `SAMP_RATE` | The time interval between consecutive samples, stored in microseconds | Converts sample index into physical time. This is critical because Lalor uses `1000` microseconds per sample while the other surveys use `2000`, so the same sample index would mean a different physical arrival time without harmonization. |
 | `SAMP_NUM` | The number of recorded samples per trace | Determines trace length. Sudbury has a longer raw window than the others, so this field is needed to harmonize the time axis. |
 | `COORD_SCALE` and `HT_SCALE` | SEG-Y scaling rules that convert stored integer coordinates into physical distances and elevations | Without these, distance calculations can be wrong by orders of magnitude. This was especially important in understanding Sudbury's awkward coordinate behavior. |
@@ -250,14 +252,14 @@ That is why this task is not a pure image problem. The waveform alone is not eno
 
 ### Discoveries from the supplementary audit
 
-The supplementary notebook did not merely confirm expectations; it invalidated several tempting assumptions:
+The supplementary notebook established that several apparently useful header fields were dead placeholders rather than real metadata:
 
 - `FIRST_BREAK_TIME` was effectively all zeros in this dataset release.
 - `MODELLED_BREAK_TIME` was effectively all zeros.
 - `FIRST_BREAK_AMPLIT` and `FIRST_BREAK_VELOCITY` were effectively all zeros where present.
 - `SPARE1` was stored as shape `(N, 1)` rather than a flat vector, which matters for safe downstream handling.
 
-This means the pipeline could not rely on a rich set of label-like auxiliary headers. In practice, `SPARE1` is the sole usable human annotation field, and the model must learn from waveform structure plus basic geometry rather than from redundant precomputed targets.
+This means the pipeline could not rely on a rich set of label-like auxiliary headers. In practice, `SPARE1` is the sole usable human annotation field, and the model must learn from waveform structure plus basic geometry alone rather than from redundant precomputed targets.
 
 ### Why `COORD_SCALE` needed careful treatment
 
@@ -301,13 +303,13 @@ Each subsection below follows the same structure:
 
 ![Raw trace sanity plot from the verification notebook](results/sanity_plots/00_first_traces.png)
 
-Each panel above is one representative raw trace, and the red dashed line marks the human first break. The key thing to notice is not just where the arrival happens, but how different the trace appearance is across assets: Lalor has a sharp, energetic onset, Sudbury is visibly noisier and longer, and Brunswick and Halfmile have different decay and oscillation character. That visual mismatch is why the rest of the pipeline had to be evidence-driven rather than generic.
+Each panel above corresponds to one asset, and the red dashed line marks the human first break on that representative trace. The visual point is asset-to-asset contrast: Lalor shows a sharper onset, Sudbury has visibly noisier pre-arrival behavior and a longer raw window, and Brunswick and Halfmile differ in oscillation and decay even though they come from the same mining camp. That is why the rest of the pipeline had to be evidence-driven rather than generic.
 
 ### 7.2 Brunswick notebook
 
 - **Question:** How large and difficult is Brunswick, and what will it demand from memory and preprocessing?
-- **Method:** The notebook audited label coverage, first-break statistics, gather widths, amplitude structure, and a coherence-style label quality check across gathers.
-- **Results:** Brunswick is the largest survey in the project with about 4.50 million traces and 83.02% labeled traces in the raw audit. Its median first-break time is 384 ms, its maximum recorded first-break time is 1358 ms, and its median gather width is 2975 traces. The EDA also used a polynomial coherence audit: within a gather, a low-order polynomial was fit to first-break time as a function of ordered trace position, and labels with unusually large residuals were counted as suspected outliers. The outlier fraction was low, around 0.39%.
+- **Method:** The notebook audited raw label counts, first-break histograms, gather-width distributions, offset geometry, amplitude behavior, and then ran a polynomial coherence audit that fit a low-order curve to first-break time as a function of ordered trace position inside each gather and flagged unusually large residuals as suspicious.
+- **Results:** Brunswick is the largest survey in the project with about 4.50 million traces and 83.02% labeled traces in the raw audit. Its median first-break time is 384 ms, its maximum recorded first-break time is 1358 ms, and its median gather width is 2975 traces. The polynomial coherence audit found an outlier fraction of about 0.39%, which still corresponds to roughly 14,559 suspicious labels out of 3,733,221 labeled traces and is materially lower than Lalor's rate.
 - **Implication:** Brunswick is the main reason the repository keeps the full 1500 ms window, balances assets during training, and uses width-aware collation rather than a naive fixed-width tensor for every gather.
 
 ![Brunswick gather-size distribution](results/eda_plots/brunswick/brunswick_gather_sizes.png)
@@ -316,7 +318,7 @@ This histogram matters because it makes the memory problem concrete. Brunswick i
 
 ### 7.3 Halfmile notebook
 
-- **Question:** Is there an asset that behaves like the most regular or clean survey in the collection?
+- **Question:** What are Halfmile's label density, gather geometry, dead-trace characteristics, and signal quality, and how do they compare with the other assets?
 - **Method:** The notebook measured label density, gather-size variability, dead-trace fraction, offset structure, and first-break statistics.
 - **Results:** Halfmile contains about 1.10 million traces with roughly 90.33% labeled traces in the raw audit, the highest label coverage of the four assets. Its gather widths are tightly concentrated around 1575 to 1604 traces, and the sampled dead-trace fraction is about 1.36%, the highest among the four assets in that audit.
 - **Implication:** Halfmile acts as a useful contrast case. It confirms that dead-trace handling is not optional, while also showing what a geometrically regular asset looks like compared with Brunswick and Sudbury.
@@ -325,7 +327,7 @@ This histogram matters because it makes the memory problem concrete. Brunswick i
 
 - **Question:** What exactly makes Lalor different: weak signal, different timing, different hardware, or label quality?
 - **Method:** The notebook measured sample rate, trace length, amplitude range, first-break statistics, label density, and signal-to-noise characteristics; the supplementary notebook later compared resampling methods directly.
-- **Results:** Lalor is the only survey sampled at 1 ms with 1501 samples per trace in raw form. It has about 2.42 million traces, only about 50% label coverage, and the highest outlier fraction in the raw quality audit at about 1.38%. Importantly, the refined SNR analysis shows that Lalor often has strong signal quality rather than uniformly weak traces.
+- **Results:** Lalor is the only survey sampled at 1 ms with 1501 samples per trace in raw form. It has about 2.42 million traces, only about 50% label coverage, and the highest outlier fraction in the raw quality audit at about 1.38%, which is roughly 16,724 suspicious labels out of 1,211,857 labeled traces. That is materially higher than Brunswick's 0.39% rate. Importantly, the refined SNR analysis shows that Lalor often has strong signal quality rather than uniformly weak traces.
 - **Implication:** Lalor's main challenge is not that the arrival is invisible. The main challenge is that its temporal resolution differs from the other assets and its labels are only partially available. That is why explicit resampling and masking mattered more than any sensor-specific handcrafted correction.
 
 ![Lalor SNR distribution](results/eda_plots/lalor/lalor_snr_dist.png)
@@ -363,7 +365,7 @@ This plot is one of the clearest justifications for variable-width batching. Hal
 - **Question:** Which early assumptions survive closer inspection when labels, resampling, geometry, and memory are audited more carefully?
 - **Method:** The notebook inspected dormant label-like fields, validated `SPARE1`, compared Lalor resampling methods, redefined shot-level SNR, checked spatial scaling sanity, and estimated gather memory cost.
 - **Results:** It confirmed that `SPARE1` is the only usable label field, that `resample_poly` preserves the first-break neighborhood well enough for Lalor harmonization, that Sudbury's coordinate behavior should be handled cautiously, and that Brunswick-scale gathers justify both a width cap of 4096 and divisibility constraints.
-- **Implication:** This notebook is why the implemented pipeline differs from the earliest informal plan. It converted vague concerns into concrete engineering rules.
+- **Implication:** It locked several concrete rules into the final pipeline: `SPARE1` as the sole ground truth, `resample_poly` for Lalor, precomputed offsets preferred over naive coordinate distance when available, and a width cap plus divisibility rule for Brunswick-scale gathers.
 
 ![Lalor resampling comparison from the supplementary notebook](results/eda_plots/supplementary/sec5_resampling_comparison.png)
 
@@ -380,11 +382,12 @@ The final pipeline is not a generic preprocessing stack. It is a direct conseque
 | Lalor uses 1 ms sampling while the others use 2 ms | Resample Lalor to 2 ms with `scipy.signal.resample_poly` | Training on mixed sample rates would make the same sample index mean different physical time across assets. |
 | Sudbury has a 2000 ms raw window with 1001 samples | Crop Sudbury to the first 751 samples / 1500 ms | Keeping a longer raw window for one asset would make the common target shape inconsistent and add late-time padding for the others. |
 | Label density is highly uneven across assets | Use `BalancedAssetSampler` during training | Without balancing, Brunswick would dominate simply because it has the most traces. |
-| Sudbury contains many unlabeled traces and even unlabeled gathers | Keep unlabeled traces as 2D input context, but mask them from loss and metrics | Deleting them would remove real spatial context from the gather and make Sudbury artificially easier but less realistic. |
+| Sudbury contains many unlabeled traces and even unlabeled gathers | Keep unlabeled traces as 2D input context, but mask them from loss and metrics | Deleting them would remove real gather-level spatial coherence from the input, shrink the dataset, and bias Sudbury toward only the cleanest labeled regions. |
 | Brunswick gathers are very wide | Use variable-width batching, local padding, width cap `4096`, and divisibility `16` | Padding everything to a single global maximum would waste memory and compute, especially for Halfmile and Sudbury. |
 | Several precomputed label-like fields are dead | Use `SPARE1` as the sole ground truth | The apparently richer label fields are all zero in this release, so relying on them would be incorrect. |
 | Coordinate scaling is inconsistent across assets | Prefer precomputed offsets and use scaled Euclidean distance only as fallback | Sudbury shows that naive coordinate use can produce implausible absolute positions even when relative geometry is still coherent. |
-| Some labels appear suspicious in the EDA quality audit | Mask suspect labels instead of deleting entire gathers | The neighboring traces still carry useful spatial information even when one label is dubious. |
+| Some labels appear suspicious in the EDA quality audit | Mask suspect labels instead of deleting entire gathers | The neighboring traces still carry useful spatial information even when one label is dubious, and deleting whole gathers would create avoidable holes in survey coverage. |
+| Extremely late labels differ by asset and can leak information if thresholds are computed globally | Compute the per-asset maximum valid label threshold from the training split only at the `99.5` percentile | This masks statistically extreme labels while preventing test-set information from shaping preprocessing. |
 | Amplitude ranges differ strongly across assets | Use per-trace max-absolute normalization | A single global amplitude scale would let one survey dominate the normalization statistics. |
 
 ### Two important clarifications
@@ -409,7 +412,7 @@ Before the pipeline writes any processed training example, it verifies several f
 - the SEG-Y coordinate scaling rules are interpreted correctly,
 - waveform and label overlays look physically sane.
 
-These checks were not ceremonial. They caught real issues: `SPARE1` had shape `(N, 1)` rather than a flat vector, several other label-like fields were all zero, and coordinate scaling required dataset-specific care.
+These checks were not ceremonial. They caught real issues: `SPARE1` had shape `(N, 1)` rather than a flat vector, which would silently trigger awkward NumPy broadcasting in label comparisons and masks if not flattened first; several other label-like fields were all zero; and coordinate scaling required dataset-specific care.
 
 ### 9.2 What would go wrong without harmonization
 
@@ -462,7 +465,7 @@ This figure is the strongest single visual summary of the preprocessing pipeline
 The default amplitude transform is **per-trace max-absolute normalization**:
 
 ```text
-trace_norm = trace / (max(abs(trace)) + epsilon)
+trace_norm = trace / (max(abs(trace)) + 1e-10)
 ```
 
 This was chosen for concrete reasons:
@@ -472,15 +475,15 @@ This was chosen for concrete reasons:
 - it avoids letting a high-amplitude survey dominate global normalization statistics,
 - it is simple and deterministic.
 
-Just as importantly, the project **does not** use global z-score normalization across the whole dataset. That would blur survey-specific amplitude structure into one set of global moments and make the strongest-amplitude assets disproportionately influential. Per-trace normalization is also one reason the repository favors regression with Soft-Argmax over a hard segmentation framing: once each trace is independently scaled, weak pre-arrival noise can appear visually larger than it would under raw amplitude, so a binary before/after region is less stable than predicting one arrival time.
+Just as importantly, the project **does not** use global z-score normalization across the whole dataset. That would blur survey-specific amplitude structure into one set of global moments and make the strongest-amplitude assets disproportionately influential. Per-trace normalization is also one reason the repository favors regression with Soft-Argmax over a hard segmentation framing: once each trace is independently scaled, weak pre-arrival noise can appear visually larger than it would under raw amplitude. That makes a crisp binary before/after region less stable. Predicting one arrival time per trace with a Soft-Argmax expectation is therefore a better match to both the normalization regime and the scientific target.
 
 ### 9.6 Label validation and masking
 
 The label pipeline begins with the rule `SPARE1 > 0`, then applies additional filters:
 
-- **Minimum valid time:** labels below `1.0 ms` are rejected because they are physically implausible as meaningful arrivals and are more likely to be corrupt placeholders or edge artifacts.
+- **Minimum valid time:** labels below `1.0 ms` are rejected because real surveys do not place receivers at zero offset, so arrivals that close to time zero are much more likely to be encoding artifacts or manual-pick noise than genuine first breaks.
 - **Trace-duration validity:** labels later than the end of the trace are rejected.
-- **Per-asset high-end filter:** labels above the `99.5` percentile are masked using a threshold computed from the **training split only** for that asset. This avoids leaking test-set information into preprocessing.
+- **Per-asset high-end filter:** labels above the `99.5` percentile are masked using a threshold computed from the **training split only** for that asset. This is a deliberate data-leakage safeguard: test labels are not allowed to influence which values count as valid during preprocessing.
 - **Dead-trace masking:** traces with effectively zero signal are masked.
 - **Gather-level coherence checks:** after sorting by offset, abrupt local jumps are treated as suspicious and masked rather than trusted blindly.
 
@@ -500,7 +503,7 @@ That is why the README should describe variable-width batching as a core design 
 
 ### 9.8 Split strategy and imbalance handling
 
-The current repository benchmark uses a deterministic **per-asset stratified `70 / 15 / 15` split** stored in `data/processed/split_index.csv`.
+The current repository benchmark uses a deterministic **per-asset stratified `70 / 15 / 15` split** stored in `data/processed/split_index.csv`. Across the processed dataset this yields `2,907` training gathers, `621` validation gathers, and `624` test gathers out of `4,152` total shot gathers. That training set size is therefore on the same order as a three-survey HardPicks training fold, even though the evaluation question here is different because each asset still contributes its own held-out shots.
 
 The split is constructed at the **shot level**, not the trace level, and stratified by median first-break time per gather. That matters because it:
 
@@ -532,7 +535,7 @@ The pipeline avoids augmentations that would break the physics or the acquisitio
 
 ### 9.10 Relation to prior preprocessing choices in the literature
 
-Published first-break papers often share the same broad goals but make different engineering compromises. Some resize or reshape gathers aggressively to satisfy fixed model input sizes. Some treat the output as segmentation. Some use heavier geometry-specific transforms before learning. This repository makes a different tradeoff:
+Published first-break papers often share the same broad goal but make different engineering choices. The St-Charles baseline resizes or crops line gathers to fixed windows and feeds distance-prior channels alongside seismic amplitudes. DGL-FB applies linear moveout correction, normalizes each trace by its absolute maximum, and then crops to a short window around `128` samples before graph-based learning. Mardan et al. focus on transfer learning with manually selected fine-tuning subsets from individual surveys rather than one simultaneous multi-asset pipeline.
 
 - it preserves the visible moveout pattern,
 - it standardizes only the time axis and sample rate,
@@ -556,8 +559,8 @@ Before running the benchmark, the project had several reasonable hypotheses:
 - **A classical STA/LTA-style picker** should define a non-learned floor: it can recover obvious high-SNR arrivals, but it should struggle on ambiguous or noisy traces because it has no gather context and no learned survey adaptation.
 - **Trace-only neural models** should learn local onset texture, but they should plateau because they cannot see the neighboring-trace moveout curve and do not explicitly ingest offset.
 - **Gather-level 2D models** should outperform 1D models because the first-break curve is a spatial object, not just a per-trace local event.
-- **A pretrained 2D model** should optimize faster than a randomly initialized 2D model because the encoder begins with useful edge and boundary detectors.
-- **A purely tabular baseline** should benefit from offset and simple handcrafted features, but it would still sacrifice raw gather context. The codebase contains such a direction in `src/features/` and `src/models/tabular.py`, but the current benchmark tables focus on the main neural models plus a logged classical reference.
+- **A purely tabular baseline** should benefit from offset and simple handcrafted features, but it would still sacrifice raw gather context. The codebase contains such a direction in `src/features/` and `src/models/tabular.py`, but the current benchmark tables focus on the main neural models plus a logged classical reference because no LightGBM-style run is exported in the saved benchmark artifacts yet.
+
 
 These hypotheses matter because they make the analysis section more than post-hoc storytelling. The benchmark is testing concrete representation claims.
 
@@ -605,8 +608,8 @@ The main gather-level models live in `src/models/unet.py`.
 - four downsampling stages,
 - decoder with skip connections,
 - per-trace time distribution collapsed by Soft-Argmax.
+The training notebook reports about `7.76M` trainable parameters for this model. That is a moderate size for a 2D benchmark network: large enough to encode multi-scale gather structure, but still far smaller than the pretrained ResNet-UNet.
 
-The training notebook reports about `7.76M` trainable parameters for this model.
 
 **ResNet-UNet with ImageNet pretraining**
 
@@ -614,8 +617,8 @@ The training notebook reports about `7.76M` trainable parameters for this model.
 - uses a ResNet-34 encoder initialized from ImageNet,
 - repeats the single seismic channel to three channels to match the encoder interface,
 - applies the same Soft-Argmax time expectation idea at the output.
+The training notebook reports about `24.44M` trainable parameters for this model. That is materially larger, but still practical for T4-era transfer learning and part of why the pretrained model can hold a lower error floor than the smaller scratch-trained U-Net.
 
-The training notebook reports about `24.44M` trainable parameters for this model.
 
 These models are scientifically attractive because one forward pass predicts all traces in a gather and can exploit the smooth cross-trace arrival structure directly.
 
@@ -628,8 +631,8 @@ In this repository, preserving thousands of trace columns deep into the bottlene
 ### 10.7 Why the Soft-Argmax head matters
 
 The Soft-Argmax head is one of the most important design choices in the project.
+Instead of emitting an unconstrained scalar with no temporal structure, the model first predicts a distribution over time for each trace. The Soft-Argmax then converts that distribution into a continuous millisecond estimate by taking the expected sample index and multiplying it by the harmonized `2.0 ms` sample interval. This has two advantages:
 
-Instead of emitting an unconstrained scalar with no temporal structure, the model first predicts a distribution over time for each trace. The Soft-Argmax then converts that distribution into a continuous millisecond estimate. This has two advantages:
 
 - it keeps the output aligned with the physical time axis,
 - it avoids forcing a brittle hard segmentation boundary in noisy, independently normalized traces.
@@ -638,7 +641,7 @@ Instead of emitting an unconstrained scalar with no temporal structure, the mode
 
 The 2D models are effectively computer-vision systems on ordered shot gathers. The geometric metadata enters mainly by determining the trace ordering and offset structure that makes the gather image meaningful. The current 1D neural models, by contrast, see only the waveform column and therefore miss explicit geometric priors.
 
-This is important for interpreting the benchmark. A 1D architecture is not only shallower in spatial context; it is also poorer in metadata usage.
+This is important for interpreting the benchmark. A 1D architecture has no access to gather-level spatial coherence, and it is also poorer in metadata usage.
 
 ---
 
@@ -656,8 +659,8 @@ This was chosen for several reasons:
 - it avoids the future-user trap of sequential fine-tuning across surveys.
 
 That last point matters. If the project had been trained survey by survey in sequence, any later researcher who wanted to continue training with more compute or more data would immediately face the risk of **catastrophic forgetting**, where later fine-tuning overwrites what was learned from earlier surveys. Combined training avoids anchoring the weights to one survey at a time and is therefore the safer default for future extensibility.
+This also distinguishes the repository from the main prior work: the St-Charles benchmark trains on three surveys and tests on a held-out fourth in each fold, Mardan et al. fine-tune on small labeled subsets from one survey at a time, DGL-FB reports a graph-based single-field-dataset experiment rather than simultaneous four-survey training, and the current repository trains on all four simultaneously with balanced sampling because its question is internal multi-asset ranking rather than leave-one-survey-out generalization. The codebase also contains a `ProgressiveAssetSampler`, which reflects that this issue was considered explicitly even though the current benchmarked runs use the balanced combined regime.
 
-The codebase also contains a `ProgressiveAssetSampler`, which reflects that this issue was considered explicitly even though the current benchmarked runs use the balanced combined regime.
 
 ### 11.2 Google-centered execution environment and hardware constraints
 
@@ -669,8 +672,8 @@ That hardware constraint shaped the benchmark directly:
 - gradient accumulation was required to reach a useful effective batch size,
 - symmetric pooling became necessary for the custom 2D model,
 - the project had to choose between going deeper on one survey or going shallower on all four.
+The repository chose the second option. It is scientifically more useful to benchmark all four assets together for 30 epochs than to overfit one survey deeply and learn less about the multi-asset problem. Gradient accumulation is the practical workaround here: when VRAM cannot hold a larger physical batch, the trainer accumulates gradients across several small steps before one optimizer update, approximating a larger effective batch size.
 
-The repository chose the second option. It is scientifically more useful to benchmark all four assets together for 30 epochs than to overfit one survey deeply and learn less about the multi-asset problem.
 
 ### 11.3 The 30-epoch champion-selection setup
 
@@ -685,8 +688,8 @@ The executed configs are:
 | CNN-1D | 2 | 4 | 30 |
 | ResNet-1D | 2 | 4 | 30 |
 | UNet-1D | 1 | 8 | 30 |
+This means the current winners should be read as **champions under a fixed resource budget**, not as fully saturated or final upper bounds. Several of them would likely benefit from longer training, larger batches, or more extensive tuning. This is especially true of the winner: the best ResNet-UNet checkpoint appears at epoch `27` of `30`, which looks much more like budget-limited training than like a clearly saturated model.
 
-This means the current winners should be read as **champions under a fixed resource budget**, not as fully saturated or final upper bounds. Several of them would likely benefit from longer training, larger batches, or more extensive tuning.
 
 ### 11.4 Losses, masking, and runtime controls
 
@@ -726,8 +729,8 @@ The repository contains additional models and training directions beyond the fiv
 - staged transfer-learning schedules such as gradual unfreezing,
 - pseudo-labeling,
 - full benchmarking of every implemented architecture.
+That omission is not conceptual; it is mainly a compute-budget decision. The configs used here are therefore reasonable starting points from the project plan rather than tuned optima.
 
-That omission is not conceptual; it is mainly a compute-budget decision.
 
 ---
 
@@ -768,11 +771,11 @@ So the issue is **not** that the repository trained on the wrong data. The issue
 | :--- | :--- |
 | `MAE (ms)` | Primary metric. Easy to interpret physically: on average, how many milliseconds away is the pick? |
 | `RMSE (ms)` | More sensitive to catastrophic misses than MAE, useful for understanding the heavy tail. |
-| `Within-5 ms` | Strict tolerance metric. At 2 ms sampling this is roughly a 2 to 3 sample tolerance. |
-| `Within-10 ms` | More forgiving and closer to a 5-sample tolerance at 2 ms, which makes it the closest ms-based analogue of the 5-pixel hit-rate style metric often reported in the literature. |
+| `Within-5 ms` | Strict tolerance metric. At 2 ms sampling this is roughly a 2 to 3 sample window, which makes it the closest physical-unit analogue of the tight hit-rate thresholds used in HardPicks-style papers. |
+| `Within-10 ms` | More forgiving and roughly a 5-sample window at 2 ms, making it the closest ms-based analogue of the 5-pixel hit-rate style metric often reported in the literature. |
 | `Latency (ms/trace)` | Accuracy alone is not enough for deployment; the picker must also be computationally usable. |
+The repository keeps the target in physical milliseconds rather than standardizing it into abstract units. That makes the outputs easier to interpret and keeps the metric meaningful across the resampled multi-asset dataset. The `5 ms` and `10 ms` thresholds were chosen as the closest physical-unit analogues of the `1 px`, `5 px`, and `1-sample` tolerance conventions already used in HardPicks-style papers, but expressed on the repository's common `2 ms` grid.
 
-The repository keeps the target in physical milliseconds rather than standardizing it into abstract units. That makes the outputs easier to interpret and keeps the metric meaningful across the resampled multi-asset dataset.
 
 ### 12.4 What is not yet part of the current evaluation story
 
@@ -780,8 +783,8 @@ Two things should be stated honestly:
 
 - The current README does not report the official leave-one-survey-out HardPicks folds.
 - The current benchmark does not include statistical significance testing such as the Wilcoxon signed-rank tests envisioned in the project plan.
+That means the leaderboard is best read as a strong internal comparison, not as a final benchmark paper claim. For the very large gaps in this README, especially 2D versus 1D, formal significance testing is unlikely to overturn the qualitative conclusion. For the much smaller differences inside the 1D family, however, significance is genuinely unknown until paired tests are run.
 
-That means the leaderboard is best read as a strong internal comparison, not as a final benchmark paper claim.
 
 ---
 
@@ -801,8 +804,8 @@ The results below come from `notebooks/04_benchmark_and_compare.ipynb` and the r
 | 4 | CNN-1D | 151.551 | 320.712 | 2.25 | 4.50 | 0.0542 |
 | 5 | ResNet-1D | 151.853 | 326.232 | 2.30 | 4.60 | 0.0707 |
 | 6 | STA/LTA (classical) | 196.872 | 448.000 | 2.63 | 5.35 | 0.0640 |
-
 The classical line is worth keeping in view. `STA/LTA` is fully non-learned and very fast, but its validation MAE of `196.872 ms` sits well behind every learned model on aggregate error. That means the neural families are not merely reproducing a simple onset heuristic; they are learning signal that the heuristic cannot capture consistently.
+The STA/LTA reference appears only in the validation leaderboard because the classical inference script logs separately to MLflow rather than to the benchmark notebook's exported aggregate test table; its absence from the test leaderboard is about logging provenance, not about hiding a bad result.
 
 #### Test leaderboard
 
@@ -819,8 +822,8 @@ The plot below should be read as the benchmark's headline figure. It shows two s
 ![Validation versus test leaderboard](results/benchmark/val_vs_test_leaderboard.png)
 
 ### 13.2 Per-asset validation breakdown from the individual training notebooks
+The benchmark notebook exports only aggregate validation and test leaderboards. However, the individual training notebooks contain per-asset **validation** MAE, which is useful for understanding the character of each model. These values should be read as notebook-level diagnostic outputs from the same saved training runs and their corresponding best-validation checkpoints, rather than as a second consolidated benchmark artifact.
 
-The benchmark notebook exports only aggregate validation and test leaderboards. However, the individual training notebooks contain per-asset **validation** MAE, which is useful for understanding the character of each model.
 
 | Model | Brunswick (val MAE) | Halfmile (val MAE) | Lalor (val MAE) | Sudbury (val MAE) |
 | :--- | ---: | ---: | ---: | ---: |
@@ -838,10 +841,10 @@ Two patterns are immediately visible:
 - the classical STA/LTA reference remains a useful floor, but it stays firmly in the single-trace regime and never approaches the gather-level models.
 
 ### 13.3 How to read these numbers relative to the literature
+The `26.333 ms` test MAE for the current winner should be interpreted carefully. It is a strong result for a multi-asset, 30-epoch, internally held-out benchmark with no exhaustive hyperparameter search, but it is **not** competitive with the strongest published cross-survey HardPicks-style numbers yet. For reference, the St-Charles workshop baseline reports held-out-site HR@1px figures such as `87.6%` on Brunswick and `76.3%` on Lalor, and DGL-FB reports `81.8%` accuracy versus `76.3%` for its own 2D benchmark on a field-dataset experiment. Even allowing for protocol and metric differences, those references make it clear that substantial headroom remains. In other words, the current repository clearly proves the representation hierarchy and validates the pipeline, but it should still be read as a noncompetitive benchmark starting point rather than as a near-state-of-the-art result.
 
-The `26.333 ms` test MAE for the current winner should be interpreted carefully. It is a strong result for a multi-asset, 30-epoch, internally held-out benchmark with no exhaustive hyperparameter search, but it is **not** a direct substitute for published HardPicks numbers because those papers typically report results under the official leave-one-survey-out protocol and often in sample- or pixel-based tolerances.
 
-That means the right conclusion is not "this is state of the art on HardPicks." The right conclusion is: **under the repository's current internal split, gather-level 2D regression models are decisively stronger than both the logged classical STA/LTA reference and the trace-only neural families, and a pretrained ResNet-UNet is the clear winner.**
+The winner also does not look converged: its best checkpoint appears at epoch `27` of `30`, which is much more consistent with budget-limited training than with saturation. The right conclusion is therefore: **under the repository's current internal split, gather-level 2D regression models are decisively stronger than both the logged classical STA/LTA reference and the trace-only neural families, and a pretrained ResNet-UNet is the clear winner.**
 
 ---
 
@@ -866,15 +869,15 @@ On test, where only the neural families are exported:
 - Absolute gap: `120.533 ms`.
 - Relative reduction: about **82% lower MAE** for the winner.
 - Within-10 ms accuracy: `40.84%` for the winner versus `4.88%` for the best 1D model, which is about **8.4x higher**.
+Those are not small improvements from tuning. They are evidence that the representation itself matters. The predictions stated in Section 10 were therefore largely confirmed: 1D models plateaued near 150 ms MAE, gather-level models separated cleanly from them, and the pretrained 2D model learned faster and better than the scratch 2D model.
 
-Those are not small improvements from tuning. They are evidence that the representation itself matters.
 
 
 ### 14.2 Why the pretrained ResNet-UNet won
 
 The winning model combines four advantages at once:
 
-1. **Gather-level context.** It sees the first-break curve across neighboring traces instead of guessing from one waveform in isolation.
+1. **Gather-level spatial coherence.** It sees the first-break curve across neighboring traces instead of guessing from one waveform in isolation.
 2. **Pretraining.** The encoder starts from a rich feature basis rather than learning edges and boundaries from scratch.
 3. **Regression-aligned output.** The Soft-Argmax head predicts one time per trace rather than forcing a brittle hard mask.
 4. **Computation amortized across the gather.** One forward pass predicts many traces at once.
@@ -887,28 +890,28 @@ The top two models also differ in how they learn.
 
 - In the benchmark notebook, the best ResNet-UNet checkpoint appears at **epoch 27** with validation MAE around `27.4 ms`.
 - The best UNet-2D checkpoint appears much earlier, at **epoch 11**, with validation MAE around `89.2 ms`.
+That suggests two different optimization regimes: the pretrained model keeps improving deep into the 30-epoch budget, while the scratch-trained UNet-2D reaches its best point very early and then largely plateaus.
 
-That suggests two different stories: the pretrained model keeps improving deep into the 30-epoch budget, while the scratch-trained UNet-2D plateaus much earlier and at a much worse level.
 
 ![ResNet-UNet training curve](results/benchmark/resnet_unet_training_curve.png)
 
 The winning curve shows rapid early improvement followed by a comparatively stable validation regime in the high-20 ms range. That is what good transfer-learning behavior looks like in this setting: the model starts from useful features and spends its budget adapting them to seismic structure rather than learning everything from zero.
 
 ![UNet-2D training curve](results/benchmark/unet_2d_training_curve.png)
+The custom UNet-2D still validates the value of the 2D gather representation, but its optimization is visibly noisier and less efficient. The early best epoch is more consistent with an initialization or capacity limitation than with the pretrained winner simply being a little more data-efficient, though a smaller overfitting contribution is still possible.
 
-The custom UNet-2D still validates the value of the 2D gather representation, but its optimization is visibly noisier and less efficient. It is not simply a little worse; it is a model that reaches a much higher error floor much earlier under the same epoch budget.
 
 ### 14.4 What the error-shape plots add beyond MAE
 
 The next two figures explain *how* the winner is better, not only *how much* better it is.
 
 ![ResNet-UNet test scatter](results/benchmark/resnet_unet_test_scatter.png)
+The winner's scatter plot clusters much more tightly around the ideal diagonal than one would expect from the aggregate numbers alone. In plain terms, when the true first break is late, the prediction is also late; when the true first break is early, the prediction is also early. The plot is therefore showing strong linear alignment between predicted and ground-truth time, not merely success on the easiest cases.
 
-The winner's scatter plot clusters much more tightly around the ideal diagonal than one would expect from the aggregate numbers alone. The pattern is consistent with a model that tracks the physical time axis well rather than only getting the easy early-arrival cases right.
 
 ![UNet-2D test error histogram](results/benchmark/unet_2d_test_error_hist.png)
+The UNet-2D histogram makes the heavy-tail problem easier to see. The model benefits from the right representation, but it still produces a much larger mass of moderate and large errors than the pretrained winner, which is why its P90 error stays close to `200 ms`. Even for the winner, a P90 of `67.743 ms` means that 10% of predictions are worse than about 68 ms, so the error tail remains a practical limitation.
 
-The UNet-2D histogram makes the heavy-tail problem easier to see. The model benefits from the right representation, but it still produces a much larger mass of moderate and large errors than the pretrained winner, which is why its P90 error stays close to `200 ms`.
 
 ### 14.5 What the 1D results reveal about representation choice
 
@@ -921,14 +924,14 @@ Three independent 1D families cluster in almost the same range:
 - UNet-1D: `146.866 ms` test MAE,
 - CNN-1D: `148.593 ms` test MAE,
 - ResNet-1D: `148.720 ms` test MAE.
+When three different architectures land in nearly the same error band, the limiting factor is usually not tiny architectural detail. It is the information available to the representation. In this case the missing information is not generic context alone; it includes the strongest tabular prior available to the task:
 
-When three different architectures land in nearly the same error band, the limiting factor is usually not tiny architectural detail. It is the information available to the representation. In this case the missing information is obvious:
 
 - no neighboring traces,
 - no visible moveout curve,
 - no explicit offset input,
 - reduced usefulness of absolute amplitude under per-trace normalization.
-
+That last point matters especially: without explicit offset, the current 1D neural models give up the cleanest physical relationship between receiver distance and arrival time.
 ### 14.6 Asset-level insight from the validation notebooks
 
 The per-asset validation tables suggest a more nuanced story than the aggregate leaderboard alone:
@@ -936,7 +939,7 @@ The per-asset validation tables suggest a more nuanced story than the aggregate 
 - **Brunswick** is the hardest place for the 1D models. That is consistent with very late arrivals and extremely wide gathers, where cross-trace structure carries a lot of information.
 - **Halfmile** is geometrically regular and well labeled, yet the 1D models still lag badly. That supports the claim that geometry alone is not enough; the model must also see the gather context.
 - **Lalor** is relatively favorable to all models compared with Brunswick, likely because the arrival is often locally strong even though the survey needed resampling and careful label handling. It is also the asset where the classical STA/LTA baseline remains comparatively most competitive.
-- **Sudbury** shows why masking rather than deletion mattered. The winning 2D model remains strong despite the label sparsity, which suggests that preserving unlabeled traces as context was scientifically worthwhile.
+- **Sudbury** shows why masking rather than deletion mattered. The winning 2D model achieves competitive Sudbury validation MAE despite the asset's label sparsity, which is consistent with the hypothesis that keeping unlabeled traces as context helped. A formal ablation would be needed to confirm that claim.
 
 ### 14.7 How these findings connect to prior work
 
@@ -945,26 +948,26 @@ The benchmark's qualitative conclusions line up well with the literature:
 - gather-level modeling beats trace-only modeling, which is exactly what the HardPicks line of work encouraged,
 - pretraining helps substantially, consistent with transfer-learning results such as Mardan et al.,
 - more geometry-aware architectures are a sensible next step, which matches the direction of DSU-Net and DGL-FB.
+What the repository contributes right now is not a new official benchmark record. Its contribution is a fully documented four-survey harmonization and training pipeline, plus a repository-backed demonstration that per-trace normalization pairs naturally with Soft-Argmax regression and that pretrained gather-level models transfer effectively across heterogeneous hard-rock surveys.
 
-What the repository contributes right now is not a new official benchmark record. It is a very clear repository-backed demonstration that representation choice, preprocessing discipline, and transfer learning matter dramatically on this multi-asset problem.
 
 ---
 
 ## 15. Latency Analysis
+### 15.1 Latency ranking from the available repository outputs
 
-### 15.1 Test-time latency ranking
-
-| Rank | Model | Test CPU latency (ms/trace) |
-| :--- | :--- | ---: |
-| 1 | CNN-1D | 0.0578 |
-| 2 | ResNet-1D | 0.0694 |
-| 3 | ResNet-UNet | 0.0764 |
-| 4 | UNet-2D | 0.1214 |
-| 5 | UNet-1D | 0.2021 |
-
+The table below combines the exported **test** latencies from the neural benchmark notebook with the logged **validation** latency of the classical STA/LTA reference. The classical run is included explicitly here because otherwise the speed comparison would be artificially asymmetric.
+| Rank | Model | Split / provenance | CPU latency (ms/trace) |
+| :--- | :--- | :--- | ---: |
+| 1 | CNN-1D | test export | 0.0578 |
+| 2 | STA/LTA (classical) | validation MLflow log | 0.0640 |
+| 3 | ResNet-1D | test export | 0.0694 |
+| 4 | ResNet-UNet | test export | 0.0764 |
+| 5 | UNet-2D | test export | 0.1214 |
+| 6 | UNet-1D | test export | 0.2021 |
 ![Accuracy-latency Pareto view of the benchmarked models](results/benchmark/deployment_pareto.png)
 
-This plot is important because it shows that the most accurate model is not a deployment disaster. The ResNet-UNet sits near the efficient frontier: it is far more accurate than every 1D model while remaining only modestly slower than the faster 1D baselines. For reference, the logged classical STA/LTA run measures `0.0640 ms/trace` on validation, which places it in roughly the same speed regime as the fast single-trace learned baselines but at much worse aggregate error.
+This plot is important because it shows that the most accurate model is not a deployment disaster. The ResNet-UNet sits near the efficient frontier: it is far more accurate than every 1D model while remaining only modestly slower than the faster 1D baselines. The classical STA/LTA row in the table comes from validation logging rather than from the notebook's test export, but it is still informative because it places the heuristic in roughly the same speed regime as the fast single-trace learned baselines while at much worse aggregate error.
 
 ### 15.2 Why latency behaves this way
 
@@ -981,8 +984,8 @@ This plot is important because it shows that the most accurate model is not a de
 ### 15.3 The most practical insight
 
 A useful way to summarize the latency story is this:
+- ResNet-UNet is only about **10% slower** than ResNet-1D on CPU latency per trace,
 
-- ResNet-UNet is only about **32% slower** than ResNet-1D on CPU latency per trace,
 - but it delivers about **82% lower** test MAE.
 
 That is an excellent accuracy-efficiency tradeoff. The winner is not only the best scientific model in this benchmark; it is also a realistic deployment candidate.
@@ -994,11 +997,11 @@ That is an excellent accuracy-efficiency tradeoff. The winner is not only the be
 ### 16.1 Current limitations
 
 - The current leaderboard is **not** the official HardPicks leave-one-survey-out benchmark.
-- The trained models were compared under a **30-epoch** resource budget and should not be assumed fully converged.
+- The trained models were compared under a **30-epoch** resource budget, and the winning ResNet-UNet reaches its best saved checkpoint at epoch `27` of `30`, which strongly suggests the model had not yet exhausted its training signal.
 - The benchmark notebook exports aggregate validation and test tables; it does not yet export a full per-asset **test** breakdown.
 - Statistical significance testing between model pairs has not yet been run.
 - The current 1D neural models do not ingest offset explicitly, which limits what conclusions one should draw about 1D modeling in general.
-- More advanced search and fine-tuning strategies were not exercised under the current compute budget.
+- The current configs are reasonable starting points from the project plan, not tuned optima; more advanced search and fine-tuning strategies were not exercised under the current compute budget.
 
 ### 16.2 Highest-priority next steps
 
@@ -1101,6 +1104,9 @@ Allen, R. V. (1978). *Automatic earthquake recognition and timing from single tr
 Allen, R. V. (1982). *Automatic phase pickers: Their present use and future prospects*. Bulletin of the Seismological Society of America, 72(6B), S225-S242.
 
 Sabbione, J. I., & Velis, D. (2010). *Automatic first-breaks picking: New strategies and algorithms*. Geophysics, 75(4), V67-V76.
+
+
+
 
 
 
