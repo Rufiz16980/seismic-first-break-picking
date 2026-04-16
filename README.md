@@ -688,6 +688,7 @@ The executed configs are:
 | CNN-1D | 2 | 4 | 30 |
 | ResNet-1D | 2 | 4 | 30 |
 | UNet-1D | 1 | 8 | 30 |
+
 This means the current winners should be read as **champions under a fixed resource budget**, not as fully saturated or final upper bounds. Several of them would likely benefit from longer training, larger batches, or more extensive tuning. This is especially true of the winner: the best ResNet-UNet checkpoint appears at epoch `27` of `30`, which looks much more like budget-limited training than like a clearly saturated model.
 
 
