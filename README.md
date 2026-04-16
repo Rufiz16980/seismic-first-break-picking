@@ -775,6 +775,7 @@ So the issue is **not** that the repository trained on the wrong data. The issue
 | `Within-5 ms` | Strict tolerance metric. At 2 ms sampling this is roughly a 2 to 3 sample window, which makes it the closest physical-unit analogue of the tight hit-rate thresholds used in HardPicks-style papers. |
 | `Within-10 ms` | More forgiving and roughly a 5-sample window at 2 ms, making it the closest ms-based analogue of the 5-pixel hit-rate style metric often reported in the literature. |
 | `Latency (ms/trace)` | Accuracy alone is not enough for deployment; the picker must also be computationally usable. |
+
 The repository keeps the target in physical milliseconds rather than standardizing it into abstract units. That makes the outputs easier to interpret and keeps the metric meaningful across the resampled multi-asset dataset. The `5 ms` and `10 ms` thresholds were chosen as the closest physical-unit analogues of the `1 px`, `5 px`, and `1-sample` tolerance conventions already used in HardPicks-style papers, but expressed on the repository's common `2 ms` grid.
 
 
