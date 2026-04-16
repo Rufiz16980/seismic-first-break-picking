@@ -1080,35 +1080,36 @@ src/
 
 ## 18. References
 
-St-Charles, P.-L., Rousseau, B., Ghosn, J., Bellefleur, G., & Schetselaar, E. (2024). *A deep learning benchmark for first break detection from hardrock seismic reflection data*. Geophysics, 89(1), WA279-WA294.
+St-Charles, P.-L., Rousseau, B., Ghosn, J., Bellefleur, G., & Schetselaar, E. (2024). *[A deep learning benchmark for first break detection from hardrock seismic reflection data](https://doi.org/10.1190/geo2022-0741.1)*. Geophysics, 89(1), WA279-WA294.
 
-St-Charles, P.-L., Rousseau, B., Ghosn, J., Bellefleur, G., & Schetselaar, E. (2021). *A multi-survey dataset and benchmark for first break picking in hard rock seismic exploration*. NeurIPS 2021 Workshop on Machine Learning for the Physical Sciences.
+St-Charles, P.-L., Rousseau, B., Ghosn, J., Bellefleur, G., & Schetselaar, E. (2021). *[A multi-survey dataset and benchmark for first break picking in hard rock seismic exploration](https://ml4physicalsciences.github.io/2021/files/NeurIPS_ML4PS_2021_3.pdf)*. NeurIPS 2021 Workshop on Machine Learning for the Physical Sciences.
 
 mila-iqia. (2026). *hardpicks: Deep learning dataset and benchmark for first-break detection from hardrock seismic reflection data*. GitHub repository. https://github.com/mila-iqia/hardpicks
 
-Mardan, A., Blouin, M., & Giroux, B. (2024). *A fine-tuning workflow for automatic first-break picking with deep learning*. Near Surface Geophysics, 22(5), 539-552.
+Mardan, A., Blouin, M., & Giroux, B. (2024). *[A fine-tuning workflow for automatic first-break picking with deep learning](https://doi.org/10.1002/nsg.12316)*. Near Surface Geophysics, 22(5), 539-552.
 
-Zwartjes, P., & Yoo, J. (2022). *First break picking with deep learning - evaluation of network architectures*. Geophysical Prospecting, 70(2), 318-342.
+Zwartjes, P., & Yoo, J. (2022). *[First break picking with deep learning - evaluation of network architectures](https://doi.org/10.1111/1365-2478.13162)*. Geophysical Prospecting, 70(2), 318-342.
 
-Wang, H., Feng, R., Wu, L., Liu, M., Cui, Y., Zhang, C., & Guo, Z. (2024). *DSU-Net: Dynamic Snake U-Net for 2-D Seismic First Break Picking*. IEEE Transactions on Geoscience and Remote Sensing, 62.
+Wang, H., Feng, R., Wu, L., Liu, M., Cui, Y., Zhang, C., & Guo, Z. (2024). *[DSU-Net: Dynamic Snake U-Net for 2-D Seismic First Break Picking](https://doi.org/10.1109/tgrs.2024.3457521)*. IEEE Transactions on Geoscience and Remote Sensing, 62.
 
-Wang, H., Long, L., Zhang, J., Wei, X., Zhang, C., & Guo, Z. (2024). *DGL-FB: Seismic First Break Picking in a Higher Dimension Using Deep Graph Learning*. arXiv:2404.08408.
+Wang, H., Long, L., Zhang, J., Wei, X., Zhang, C., & Guo, Z. (2024). *[DGL-FB: Seismic First Break Picking in a Higher Dimension Using Deep Graph Learning](https://arxiv.org/abs/2404.08408)*. arXiv:2404.08408.
 
-Bellefleur, G., Schetselaar, E., White, D., Miah, K., & Dueck, P. (2015). *3D seismic imaging of the Lalor volcanogenic sulphide deposit, Manitoba, Canada*. Geophysical Prospecting, 63, 813-832.
+Bellefleur, G., Schetselaar, E., White, D., Miah, K., & Dueck, P. (2015). *[3D seismic imaging of the Lalor volcanogenic sulphide deposit, Manitoba, Canada](https://doi.org/10.1111/1365-2478.12236)*. Geophysical Prospecting, 63, 813-832.
 
-Malehmir, A., & Bellefleur, G. (2009). *3D seismic reflection imaging of volcanic-hosted massive sulfide deposits: Insights from reprocessing Halfmile Lake data, New Brunswick, Canada*. Geophysics, 74(6), B209-B219.
+Malehmir, A., & Bellefleur, G. (2009). *[3D seismic reflection imaging of volcanic-hosted massive sulfide deposits: Insights from reprocessing Halfmile Lake data, New Brunswick, Canada](https://doi.org/10.1190/1.3230495)*. Geophysics, 74(6), B209-B219.
 
-Adam, E., Perron, G., Milkereit, B., Wu, J., Calvert, A. J., Salisbury, M., Verpaelst, P., & Dion, D. J. (2000). *A review of high-resolution seismic profiling across the Sudbury, Selbaie, Noranda, and Matagami mining camps*. Canadian Journal of Earth Sciences, 37(2-3), 503-516.
+Adam, E., Perron, G., Milkereit, B., Wu, J., Calvert, A. J., Salisbury, M., Verpaelst, P., & Dion, D. J. (2000). *[A review of high-resolution seismic profiling across the Sudbury, Selbaie, Noranda, and Matagami mining camps](https://doi.org/10.1139/e99-064)*. Canadian Journal of Earth Sciences, 37(2-3), 503-516.
 
-Wolpert, D. H., & Macready, W. G. (1997). *No free lunch theorems for optimization*. IEEE Transactions on Evolutionary Computation, 1(1), 67-82.
+Wolpert, D. H., & Macready, W. G. (1997). *[No free lunch theorems for optimization](https://doi.org/10.1109/4235.585893)*. IEEE Transactions on Evolutionary Computation, 1(1), 67-82.
 
-Akaike, H. (1974). *A new look at the statistical model identification*. IEEE Transactions on Automatic Control, 19(6), 716-723.
+Akaike, H. (1974). *[A new look at the statistical model identification](https://doi.org/10.1109/tac.1974.1100705)*. IEEE Transactions on Automatic Control, 19(6), 716-723.
 
-Allen, R. V. (1978). *Automatic earthquake recognition and timing from single traces*. Bulletin of the Seismological Society of America, 68, 1521-1532.
+Allen, R. V. (1978). *[Automatic earthquake recognition and timing from single traces](https://doi.org/10.1785/bssa0680051521)*. Bulletin of the Seismological Society of America, 68, 1521-1532.
 
-Allen, R. V. (1982). *Automatic phase pickers: Their present use and future prospects*. Bulletin of the Seismological Society of America, 72(6B), S225-S242.
+Allen, R. V. (1982). *[Automatic phase pickers: Their present use and future prospects](https://doi.org/10.1785/bssa07206b0225)*. Bulletin of the Seismological Society of America, 72(6B), S225-S242.
 
-Sabbione, J. I., & Velis, D. (2010). *Automatic first-breaks picking: New strategies and algorithms*. Geophysics, 75(4), V67-V76.
+Sabbione, J. I., & Velis, D. (2010). *[Automatic first-breaks picking: New strategies and algorithms](https://doi.org/10.1190/1.3463703)*. Geophysics, 75(4), V67-V76.
+
 
 
 
