@@ -806,7 +806,9 @@ The results below come from `notebooks/04_benchmark_and_compare.ipynb` and the r
 | 4 | CNN-1D | 151.551 | 320.712 | 2.25 | 4.50 | 0.0542 |
 | 5 | ResNet-1D | 151.853 | 326.232 | 2.30 | 4.60 | 0.0707 |
 | 6 | STA/LTA (classical) | 196.872 | 448.000 | 2.63 | 5.35 | 0.0640 |
+
 The classical line is worth keeping in view. `STA/LTA` is fully non-learned and very fast, but its validation MAE of `196.872 ms` sits well behind every learned model on aggregate error. That means the neural families are not merely reproducing a simple onset heuristic; they are learning signal that the heuristic cannot capture consistently.
+
 The STA/LTA reference appears only in the validation leaderboard because the classical inference script logs separately to MLflow rather than to the benchmark notebook's exported aggregate test table; its absence from the test leaderboard is about logging provenance, not about hiding a bad result.
 
 #### Test leaderboard
@@ -967,6 +969,7 @@ The table below combines the exported **test** latencies from the neural benchma
 | 4 | ResNet-UNet | test export | 0.0764 |
 | 5 | UNet-2D | test export | 0.1214 |
 | 6 | UNet-1D | test export | 0.2021 |
+
 ![Accuracy-latency Pareto view of the benchmarked models](results/benchmark/deployment_pareto.png)
 
 This plot is important because it shows that the most accurate model is not a deployment disaster. The ResNet-UNet sits near the efficient frontier: it is far more accurate than every 1D model while remaining only modestly slower than the faster 1D baselines. The classical STA/LTA row in the table comes from validation logging rather than from the notebook's test export, but it is still informative because it places the heuristic in roughly the same speed regime as the fast single-trace learned baselines while at much worse aggregate error.
